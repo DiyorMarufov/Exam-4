@@ -1,9 +1,12 @@
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { categories } from './models/category.model';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { error } from 'winston';
 
 @Injectable()
 export class CategoriesService {
@@ -15,11 +18,12 @@ export class CategoriesService {
   async create(createCategoryDto: CreateCategoryDto): Promise<categories> {
     try {
       const category = await this.categoryModel.create({
-        ...createCategoryDto
+        ...createCategoryDto,
       });
       return category;
     } catch (error) {
-      throw new InternalServerErrorException('Kategoriya yaratishda xatolik yuz berdi');
+      throw new InternalServerErrorException(
+        'Kategoriya yaratishda xatolik yuz berdi',);
     }
   }
 
@@ -27,7 +31,10 @@ export class CategoriesService {
     try {
       return await this.categoryModel.findAll();
     } catch (error) {
-      throw new InternalServerErrorException('Kategoriyalarni olishda xatolik yuz berdi',error.message);
+      throw new InternalServerErrorException(
+        'Kategoriyalarni olishda xatolik yuz berdi',
+        error.message,
+      );
     }
   }
 
@@ -39,16 +46,25 @@ export class CategoriesService {
       }
       return category;
     } catch (error) {
-      throw new InternalServerErrorException('Kategoriya topishda xatolik yuz berdi', error.message);
+      throw new InternalServerErrorException(
+        'Kategoriya topishda xatolik yuz berdi',
+        error.message,
+      );
     }
   }
 
-  async update(id: number, updateCategoryDto: UpdateCategoryDto): Promise<categories> {
+  async update(
+    id: number,
+    updateCategoryDto: UpdateCategoryDto,
+  ): Promise<categories> {
     try {
       const category = await this.findOne(id);
       return await category.update(updateCategoryDto);
     } catch (error) {
-      throw new InternalServerErrorException('Kategoriyani yangilashda xatolik yuz berdi', error.message);
+      throw new InternalServerErrorException(
+        'Kategoriyani yangilashda xatolik yuz berdi',
+        error.message,
+      );
     }
   }
 
@@ -57,9 +73,10 @@ export class CategoriesService {
       const category = await this.findOne(id);
       await category.destroy();
     } catch (error) {
-      throw new InternalServerErrorException('Kategoriyani ochirishda xatolik yuz berdi', error.message);
+      throw new InternalServerErrorException(
+        'Kategoriyani ochirishda xatolik yuz berdi',
+        error.message,
+      );
     }
   }
 }
-
-
