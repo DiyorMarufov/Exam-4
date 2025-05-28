@@ -7,13 +7,19 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from '../users/models/user.model';
+import { Cart } from '../carts/models/cart.model';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User) private model: typeof User) {}
+  constructor(
+    @InjectModel(User) private userModel: typeof User,
+    @InjectModel(Cart) private cartModel: typeof Cart,
+  ) {}
   async create(createUserDto: CreateUserDto) {
     try {
-      const newUser = await this.model.create({ ...createUserDto });
+      const newUser = await this.userModel.create({ ...createUserDto });
+      await this.cartModel.create({ buyer_id: newUser.id });
+
       return newUser;
     } catch (e) {
       throw new InternalServerErrorException(e.message);
@@ -22,7 +28,7 @@ export class UsersService {
 
   async findAll() {
     try {
-      return this.model.findAll();
+      return this.userModel.findAll();
     } catch (e) {
       throw new InternalServerErrorException(e.message);
     }

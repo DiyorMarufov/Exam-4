@@ -30,7 +30,7 @@ export class User extends Model {
 
   @Column({
     type: DataType.ENUM('buyer', 'seller', 'admin', 'superadmin'),
-    allowNull: false,
+    defaultValue: "buyer",
   })
   role: string;
 

@@ -9,6 +9,7 @@ import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
 import { Cart } from './carts/models/cart.model';
 import { User } from './users/models/user.model';
+import { CartItems } from './cart-items/models/cart-item.model';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { User } from './users/models/user.model';
       synchronize: true,
       logging: false,
       autoLoadModels: true,
-      models: [Cart, User],
+      models: [Cart, User, CartItems],
     }),
     OrdersModule,
     OrderItemsModule,
