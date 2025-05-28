@@ -43,15 +43,19 @@ export class CartsService {
   }
 
   async update(id: number, updateCartDto: UpdateCartDto) {
-    const [count, rows] = await this.model.update(updateCartDto, {
-      where: { id },
-      returning: true,
-    });
+    try {
+      const [count, rows] = await this.model.update(updateCartDto, {
+        where: { id },
+        returning: true,
+      });
 
-    if (count === 0) {
-      throw new NotFoundException(`Updated cart not found`);
+      if (count === 0) {
+        throw new NotFoundException(`Updated cart not found`);
+      }
+      return rows[0];
+    } catch (e) {
+      throw new InternalServerErrorException(e.message);
     }
-    return rows[0];
   }
 
   async remove(id: number) {
