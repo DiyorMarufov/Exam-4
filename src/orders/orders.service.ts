@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectModel } from '@nestjs/sequelize';
@@ -18,80 +22,118 @@ export class OrdersService {
   ) {}
   async createOrderFromCart(createOrderDto: CreateOrderDto) {
     try {
-      
+      const { buyer_id, cart_item_id } = createOrderDto;
+
       const cart = await this.cartModel.findOne({
-        where: { buyer_id: createOrderDto.buyer_id },
+        where: { buyer_id },
         include: [CartItems],
       });
-      
-      
+
       if (!cart || !cart.dataValues.items.length) {
         throw new NotFoundException(`Cart is empty`);
+      }
+
+      const selectedItems = cart.dataValues.items.filter((item: any) =>
+        cart_item_id.includes(item.dataValues.id),
+      );
+
+      if (!selectedItems.length) {
+        throw new NotFoundException(`No matching cart items found`);
       }
 
       const newOrder = await this.orderModel.create({
         ...createOrderDto,
         order_status: 'pending',
       });
-      
-      const newOrderItems = cart.dataValues.items.map((item: any) => {
-        return {
-          order_id: newOrder.id,
-          product_id: item.product_id,
-          quantity: item.quantity,
-          price: item.price,
-        };
+
+      const newOrderItems = selectedItems.map((item: any) => ({
+        order_id: newOrder.id,
+        product_id: item.dataValues.product_id,
+        quantity: item.dataValues.quantity,
+        price: item.dataValues.price,
+      }));
+
+      await this.orderItemModel.bulkCreate(newOrderItems);
+
+      await this.cartItemModel.destroy({
+        where: { id: cart_item_id },
       });
-      console.log(newOrderItems)
+
       return {
-         message: 'success'
-      }
-      // await this.orderItemModel.bulkCreate(newOrderItems);
-
-      // await this.cartModel.destroy({
-      //   where: { buyer_id: createOrderDto.buyer_id },
-      // });
-
-      // await this.cartItemModel.destroy({
-      //   where: { cart_id: cart.id },
-      // });
-
-      // return {
-      //   statusCode: 201,
-      //   message: 'success',
-      //   data: newOrder,
-      // };
+        statusCode: 201,
+        message: 'success',
+        data: newOrder,
+      };
     } catch (e) {
       return catchError(e);
     }
   }
 
   async findAll() {
-    return {
-      statusCode: 200,
-      message: 'success',
-      data: await this.orderModel.findAll(),
-    };
+    try {
+      return {
+        statusCode: 200,
+        message: 'success',
+        data: await this.orderModel.findAll(),
+      };
+    } catch (e) {
+      return catchError(e);
+    }
   }
 
   async findOne(id: number) {
-    const order = await this.orderModel.findByPk(id);
-    if (!order) {
-      throw new NotFoundException(`Order with ID ${id} not found`);
-    }
+    try {
+      const order = await this.orderModel.findByPk(id);
+      if (!order) {
+        throw new NotFoundException(`Order with ID ${id} not found`);
+      }
 
-    return {
-      statusCode: 200,
-      message: 'success',
-      data: order,
-    };
+      return {
+        statusCode: 200,
+        message: 'success',
+        data: order,
+      };
+    } catch (e) {
+      return catchError(e);
+    }
   }
 
   async update(id: number, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
+    try {
+      const [count, rows] = await this.orderModel.update(updateOrderDto, {
+        where: { id },
+        returning: true,
+      });
+
+      if (count === 0) {
+        throw new BadRequestException(`Data not found or not updated`);
+      }
+
+      return {
+        statusCode: 200,
+        message: 'success',
+        data: rows[0],
+      };
+    } catch (e) {
+      return catchError(e);
+    }
   }
 
   async remove(id: number) {
-    return `This action removes a #${id} order`;
+    try {
+      const count = await this.orderModel.destroy({ where: { id } });
+
+      if (count === 0) {
+        throw new BadRequestException(`Data not deleted or not found`);
+      }
+
+      return {
+        statusCode: 200,
+        message: 'success',
+        data: {},
+      };
+    } catch (e) {
+      return catchError(e);
+    }
   }
 }

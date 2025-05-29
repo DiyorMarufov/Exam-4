@@ -21,12 +21,9 @@ export class Orders extends Model {
   @Column({
     type: DataType.ENUM(
       orderStatus.PENDING,
-      orderStatus.PROCESSING,
       orderStatus.SHIPPED,
       orderStatus.DELIVERED,
       orderStatus.CANCELLED,
-      orderStatus.FAILED,
-      orderStatus.REFUNDED,
     ),
     defaultValue: orderStatus.PENDING,
   })
@@ -47,10 +44,16 @@ export class Orders extends Model {
     allowNull: false,
   })
   delivery_address: string;
-  
+
   @Column({
     type: DataType.STRING,
     allowNull: false,
   })
   contact_phone: string;
+
+  @Column({
+    type: DataType.ARRAY(DataType.INTEGER),
+    allowNull: false,
+  })
+  cart_item_id: number[];
 }

@@ -1,14 +1,8 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
-import { CreateCartDto } from './dto/create-cart.dto';
-import { UpdateCartDto } from './dto/update-cart.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Carts } from '../carts/models/cart.model';
 import { catchError } from '../utils/error-catch';
+import { Users } from '../users/models/user.model';
 
 @Injectable()
 export class CartsService {
@@ -16,7 +10,7 @@ export class CartsService {
 
   async findAll() {
     try {
-      const carts = await this.model.findAll();
+      const carts = await this.model.findAll({ include: { all: true } });
       return carts;
     } catch (err) {
       return catchError(err);
@@ -25,7 +19,7 @@ export class CartsService {
 
   async findOne(id: number) {
     try {
-      const cart = await this.model.findByPk(id);
+      const cart = await this.model.findByPk(id, { include: { all: true } });
 
       if (!cart) {
         throw new NotFoundException(`User with ID ${id} not found`);

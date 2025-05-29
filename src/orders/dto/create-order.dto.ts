@@ -5,6 +5,8 @@ import {
   IsNotEmpty,
   IsString,
   IsOptional,
+  IsArray,
+  IsNumber,
 } from 'class-validator';
 import { orderStatus } from '../../enums/order-status';
 import { deliveryMethod } from '../../enums/delivery-method';
@@ -29,4 +31,9 @@ export class CreateOrderDto {
   @IsPhoneNumber('UZ')
   @IsNotEmpty()
   contact_phone: string;
+
+  @IsArray()
+  @IsNotEmpty()
+  @IsNumber({}, { each: true })
+  cart_item_id: number[];
 }

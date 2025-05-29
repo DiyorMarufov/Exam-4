@@ -4,7 +4,8 @@ import {
   Model,
   DataType,
   ForeignKey,
-  HasMany,
+  BelongsTo,
+  HasMany
 } from 'sequelize-typescript';
 import { Users } from '../../users/models/user.model';
 import { CartItems } from '../../cart-items/models/cart-item.model';
@@ -17,6 +18,9 @@ export class Carts extends Model {
     allowNull: false,
   })
   buyer_id: number;
+
+  @BelongsTo(() => Users)
+  user: Users;
 
   @HasMany(() => CartItems)
   items: CartItems[];
