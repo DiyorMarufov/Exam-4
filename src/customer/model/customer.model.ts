@@ -26,7 +26,7 @@ export class Customer extends Model {
     type: DataType.STRING,
     allowNull: false,
   })
-  declare password: string;
+  declare hashedPassword: string;
 
   @Column({
     type: DataType.STRING,

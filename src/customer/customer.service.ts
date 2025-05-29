@@ -5,7 +5,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Customer } from './model/customer.model';
 import { Roles } from 'src/ENUM';
 import { UserSingInDto } from './dto/user-signIn-dto';
-
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class CustomerService {
   constructor(
@@ -26,10 +26,12 @@ export class CustomerService {
       if (existingPhone) {
         throw new BadRequestException('Phone number already exists');
       }
-
+      const { password } = createCustomerDto;
+      const hashedPassword = await bcrypt.hash(password, 10);
       const newCustomer = await this.customerModel.create({
         ...createCustomerDto,
         role: Roles.CUSTOMER,
+        hashedPassword,
       });
       return newCustomer;
     } catch (error) {
