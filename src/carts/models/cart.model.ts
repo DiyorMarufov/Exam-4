@@ -4,15 +4,20 @@ import {
   Model,
   DataType,
   ForeignKey,
+  HasMany,
 } from 'sequelize-typescript';
-import { User } from '../../users/models/user.model';
+import { Users } from '../../users/models/user.model';
+import { CartItems } from '../../cart-items/models/cart-item.model';
 
 @Table({ tableName: 'carts' })
-export class Cart extends Model {
-  @ForeignKey(() => User)
+export class Carts extends Model {
+  @ForeignKey(() => Users)
   @Column({
-    type: DataType.STRING,
+    type: DataType.INTEGER,
     allowNull: false,
   })
-  buyer_id: string;
+  buyer_id: number;
+
+  @HasMany(() => CartItems)
+  items: CartItems[];
 }

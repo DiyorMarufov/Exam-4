@@ -6,14 +6,14 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/sequelize';
-import { User } from '../users/models/user.model';
-import { Cart } from '../carts/models/cart.model';
+import { Users } from '../users/models/user.model';
+import { Carts } from '../carts/models/cart.model';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(User) private userModel: typeof User,
-    @InjectModel(Cart) private cartModel: typeof Cart,
+    @InjectModel(Users) private userModel: typeof Users,
+    @InjectModel(Carts) private cartModel: typeof Carts,
   ) {}
   async create(createUserDto: CreateUserDto) {
     try {

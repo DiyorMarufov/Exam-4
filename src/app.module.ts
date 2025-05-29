@@ -7,9 +7,11 @@ import { CartsModule } from './carts/carts.module';
 import { CartItemsModule } from './cart-items/cart-items.module';
 import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
-import { Cart } from './carts/models/cart.model';
-import { User } from './users/models/user.model';
+import { Carts } from './carts/models/cart.model';
+import { Users } from './users/models/user.model';
 import { CartItems } from './cart-items/models/cart-item.model';
+import { Orders } from './orders/models/order.model';
+import { OrderItems } from './order-items/models/order-item.model';
 
 @Module({
   imports: [
@@ -27,7 +29,7 @@ import { CartItems } from './cart-items/models/cart-item.model';
       synchronize: true,
       logging: false,
       autoLoadModels: true,
-      models: [Cart, User, CartItems],
+      models: [Carts, Users, CartItems, Orders, OrderItems],
     }),
     OrdersModule,
     OrderItemsModule,

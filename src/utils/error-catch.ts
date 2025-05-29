@@ -7,5 +7,6 @@ export const catchError = (error: any) => {
       error?.response?.statusCode,
     );
   }
+  console.log(error)
   throw new InternalServerErrorException(error.message);
 };

@@ -5,18 +5,19 @@ import {
   DataType,
   ForeignKey,
 } from 'sequelize-typescript';
-import { Carts } from '../../carts/models/cart.model';
+import { Orders } from '../../orders/models/order.model';
 
-@Table({ tableName: 'cart-items' })
-export class CartItems extends Model {
-  @ForeignKey(() => Carts)
+@Table({ tableName: 'order-items' })
+export class OrderItems extends Model {
+  @ForeignKey(() => Orders)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
-  cart_id: number;
+  order_id: number;
 
   @Column({
+    type: DataType.INTEGER,
     allowNull: true,
   })
   product_id?: number;

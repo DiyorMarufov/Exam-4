@@ -7,12 +7,12 @@ import {
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
 import { InjectModel } from '@nestjs/sequelize';
-import { Cart } from '../carts/models/cart.model';
+import { Carts } from '../carts/models/cart.model';
 import { catchError } from '../utils/error-catch';
 
 @Injectable()
 export class CartsService {
-  constructor(@InjectModel(Cart) private model: typeof Cart) {}
+  constructor(@InjectModel(Carts) private model: typeof Carts) {}
 
   async findAll() {
     try {
