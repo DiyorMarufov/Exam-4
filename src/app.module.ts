@@ -3,6 +3,10 @@ import { ConfigModule } from '@nestjs/config';
 import { CategoriesModule } from './categories/categories.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { categories } from './categories/models/category.model';
+import { ReportsModule } from './reports/reports.module';
+import { reports } from './reports/models/report.model';
+import { ProductsModule } from './products/products.module';
+import { RewiewsModule } from './rewiews/rewiews.module';
 
 @Module({
   imports: [
@@ -20,9 +24,12 @@ import { categories } from './categories/models/category.model';
       synchronize: true,
       logging: false,
       autoLoadModels: true,
-      models: [categories],
+      models: [categories, reports],
     }),
     CategoriesModule,
+    ReportsModule,
+    ProductsModule,
+    RewiewsModule,
   ],
 })
 export class AppModule {}

@@ -1,12 +1,9 @@
-import {
-  Injectable,
-  NotFoundException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { categories } from './models/category.model';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { catchError } from 'src/utils/error-catch';
 
 @Injectable()
 export class CategoriesService {
@@ -22,8 +19,7 @@ export class CategoriesService {
       });
       return category;
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Kategoriya yaratishda xatolik yuz berdi',);
+      return catchError(error);
     }
   }
 
@@ -31,10 +27,7 @@ export class CategoriesService {
     try {
       return await this.categoryModel.findAll();
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Kategoriyalarni olishda xatolik yuz berdi',
-        error.message,
-      );
+      return catchError(error);
     }
   }
 
@@ -46,10 +39,7 @@ export class CategoriesService {
       }
       return category;
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Kategoriya topishda xatolik yuz berdi',
-        error.message,
-      );
+      return catchError(error);
     }
   }
 
@@ -61,22 +51,21 @@ export class CategoriesService {
       const category = await this.findOne(id);
       return await category.update(updateCategoryDto);
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Kategoriyani yangilashda xatolik yuz berdi',
-        error.message,
-      );
+      return catchError(error);
     }
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number): Promise<object> {
     try {
-      const category = await this.findOne(id);
-      await category.destroy();
+      const count =  await this.categoryModel.destroy({ where: { id } });
+      if (count === 0) {
+        throw new BadRequestException(`Data with ${id} not found`)
+      }
+      return {
+        data: {},
+      };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Kategoriyani ochirishda xatolik yuz berdi',
-        error.message,
-      );
+      return catchError(error);
     }
   }
 }
