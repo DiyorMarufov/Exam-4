@@ -15,7 +15,7 @@ export class UsersService {
     @InjectModel(Users) private userModel: typeof Users,
     @InjectModel(Carts) private cartModel: typeof Carts,
   ) {}
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto): Promise<Object> {
     try {
       const newUser = await this.userModel.create({ ...createUserDto });
       await this.cartModel.create({ buyer_id: newUser.id });
@@ -26,7 +26,7 @@ export class UsersService {
     }
   }
 
-  async findAll() {
+  async findAll(): Promise<Object> {
     try {
       return this.userModel.findAll();
     } catch (e) {
@@ -34,15 +34,15 @@ export class UsersService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Object> {
     return `This action returns a #${id} user`;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<Object> {
     return `This action updates a #${id} user`;
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<Object> {
     return `This action removes a #${id} user`;
   }
 }

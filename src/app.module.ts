@@ -16,15 +16,15 @@ import { MessagesModule } from './messages/messages.module';
 import { Messages } from './messages/models/message.model';
 import { AdminsModule } from './admins/admins.module';
 import { Admin } from './admins/models/admin.model';
+import { MailModule } from './mail/mail.module';
+import { CacheModule, CacheInterceptor } from '@nestjs/cache-manager';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
-    }),
-    JwtModule.register({
-      global: true,
     }),
     SequelizeModule.forRoot({
       dialect: 'postgres',
@@ -38,6 +38,12 @@ import { Admin } from './admins/models/admin.model';
       autoLoadModels: true,
       models: [Carts, Users, CartItems, Orders, OrderItems, Messages, Admin],
     }),
+    CacheModule.register({
+      isGlobal: true,
+    }),
+    JwtModule.register({
+      global: true,
+    }),
     OrdersModule,
     OrderItemsModule,
     CartsModule,
@@ -45,6 +51,13 @@ import { Admin } from './admins/models/admin.model';
     UsersModule,
     MessagesModule,
     AdminsModule,
+    MailModule,
+  ],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: CacheInterceptor,
+    },
   ],
 })
 export class AppModule {}

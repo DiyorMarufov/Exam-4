@@ -2,13 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Carts } from '../carts/models/cart.model';
 import { catchError } from '../utils/error-catch';
-import { Users } from '../users/models/user.model';
 
 @Injectable()
 export class CartsService {
   constructor(@InjectModel(Carts) private model: typeof Carts) {}
 
-  async findAll() {
+  async findAll(): Promise<Object> {
     try {
       const carts = await this.model.findAll({ include: { all: true } });
       return carts;
@@ -17,7 +16,7 @@ export class CartsService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Object> {
     try {
       const cart = await this.model.findByPk(id, { include: { all: true } });
 

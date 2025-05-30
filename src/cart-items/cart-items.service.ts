@@ -12,7 +12,7 @@ import { catchError } from '../utils/error-catch';
 @Injectable()
 export class CartItemsService {
   constructor(@InjectModel(CartItems) private model: typeof CartItems) {}
-  async create(createCartItemDto: CreateCartItemDto) {
+  async create(createCartItemDto: CreateCartItemDto): Promise<Object> {
     try {
       const newCartItems = await this.model.create({ ...createCartItemDto });
       return {
@@ -25,7 +25,7 @@ export class CartItemsService {
     }
   }
 
-  async findAll() {
+  async findAll(): Promise<Object> {
     try {
       return {
         statusCode: 200,
@@ -37,7 +37,7 @@ export class CartItemsService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Object> {
     try {
       const cartItem = await this.model.findByPk(id);
 
@@ -54,7 +54,10 @@ export class CartItemsService {
     }
   }
 
-  async update(id: number, updateCartItemDto: UpdateCartItemDto) {
+  async update(
+    id: number,
+    updateCartItemDto: UpdateCartItemDto,
+  ): Promise<Object> {
     try {
       const [count, rows] = await this.model.update(updateCartItemDto, {
         where: { id },
@@ -77,7 +80,7 @@ export class CartItemsService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<Object> {
     try {
       const count = await this.model.destroy({ where: { id } });
 

@@ -20,7 +20,7 @@ export class OrdersService {
     @InjectModel(OrderItems) private orderItemModel: typeof OrderItems,
     @InjectModel(CartItems) private cartItemModel: typeof CartItems,
   ) {}
-  async createOrderFromCart(createOrderDto: CreateOrderDto) {
+  async createOrderFromCart(createOrderDto: CreateOrderDto): Promise<Object> {
     try {
       const { buyer_id, cart_item_id } = createOrderDto;
 
@@ -69,7 +69,7 @@ export class OrdersService {
     }
   }
 
-  async findAll() {
+  async findAll(): Promise<Object> {
     try {
       return {
         statusCode: 200,
@@ -81,7 +81,7 @@ export class OrdersService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Object> {
     try {
       const order = await this.orderModel.findByPk(id);
       if (!order) {
@@ -98,7 +98,7 @@ export class OrdersService {
     }
   }
 
-  async update(id: number, updateOrderDto: UpdateOrderDto) {
+  async update(id: number, updateOrderDto: UpdateOrderDto): Promise<Object> {
     try {
       const [count, rows] = await this.orderModel.update(updateOrderDto, {
         where: { id },
@@ -119,7 +119,7 @@ export class OrdersService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<Object> {
     try {
       const count = await this.orderModel.destroy({ where: { id } });
 

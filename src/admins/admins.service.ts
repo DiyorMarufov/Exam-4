@@ -4,23 +4,33 @@ import {
   Injectable,
   InternalServerErrorException,
   OnModuleInit,
+  Inject,
 } from '@nestjs/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { Admin } from './models/admin.model';
-import { decrypt, encrypt } from 'src/utils/encrypt-decrypt';
+import { decrypt, encrypt } from '../utils/encrypt-decrypt';
 import { Roles } from '../enums/admin';
 import { catchError } from '../utils/error-catch';
 import { SignInAdminDto } from './dto/signin-admin.dto';
-import { TokenService } from 'src/utils/generate-token';
+import { ConfirmSignInAdminDto } from './dto/confirm-signin-admin.dto';
+import { TokenService } from '../utils/generate-token';
+import { generateOtp } from '../utils/otp-generator';
+import { MailService } from '../mail/mail.service';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { writeToCookie } from '../utils/write-cookie';
+import { Response } from 'express';
 
 @Injectable()
 export class AdminService implements OnModuleInit {
   constructor(
     @InjectModel(Admin) private adminModel: typeof Admin,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly mailService: MailService,
     private readonly tokenService: TokenService,
   ) {}
-
+  
   async onModuleInit(): Promise<void> {
     try {
       const isSuperAdmin = await this.adminModel.findOne({
@@ -80,22 +90,53 @@ export class AdminService implements OnModuleInit {
       if (!admin) {
         throw new BadRequestException('Email or password incorrect');
       }
+
       const { hashed_password } = admin?.dataValues;
       const isMatchPassword = await decrypt(password, hashed_password);
       if (!isMatchPassword) {
         throw new BadRequestException('Email or password incorrect');
       }
 
+      const otp = generateOtp();
+      await this.mailService.sendOtp(email, otp);
+      await this.cacheManager.set(email, otp, 120000);
+      
+      return {
+        statusCode: 200,
+        message: 'success',
+        data: email,
+      };
+    } catch (error) {
+      return catchError(error);
+    }
+  }
+
+  async confirmSigninAdmin(
+    confirmSignInDto: ConfirmSignInAdminDto,
+    res: Response,
+  ): Promise<object> {
+    try {
+      const { email, otp } = confirmSignInDto;
+      const hasUser = await this.cacheManager.get(email);
+      
+      if (!hasUser || hasUser !== otp) {
+        throw new BadRequestException(`Incorrect or expired otp`);
+      }
+
+      const admin = await this.adminModel.findOne({ where: { email } });
       const { id, role, status } = admin?.dataValues;
       const payload = { id, role, status };
       const accessToken = await this.tokenService.accessToken(payload);
+      const refreshToken = await this.tokenService.refreshToken(payload);
+
+      writeToCookie(res, 'refreshTokenAdmin', refreshToken);
       return {
         statusCode: 200,
         message: 'success',
         data: accessToken,
       };
-    } catch (error) {
-      return catchError(error);
+    } catch (e) {
+      return catchError(e);
     }
   }
 }

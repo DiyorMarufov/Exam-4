@@ -12,7 +12,7 @@ import { catchError } from '../utils/error-catch';
 @Injectable()
 export class MessagesService {
   constructor(@InjectModel(Messages) private model: typeof Messages) {}
-  async create(createMessageDto: CreateMessageDto) {
+  async create(createMessageDto: CreateMessageDto): Promise<Object> {
     try {
       const newMessage = await this.model.create({ ...createMessageDto });
       return {
@@ -25,7 +25,7 @@ export class MessagesService {
     }
   }
 
-  async findAll() {
+  async findAll(): Promise<Object> {
     try {
       return {
         statusCode: 200,
@@ -36,8 +36,8 @@ export class MessagesService {
       return catchError(e);
     }
   }
-  
-  async findOne(id: number) {
+
+  async findOne(id: number): Promise<Object> {
     try {
       const message = await this.model.findByPk(id);
       if (!message) {
@@ -53,7 +53,10 @@ export class MessagesService {
     }
   }
 
-  async update(id: number, updateMessageDto: UpdateMessageDto) {
+  async update(
+    id: number,
+    updateMessageDto: UpdateMessageDto,
+  ): Promise<Object> {
     try {
       const [count, rows] = await this.model.update(updateMessageDto, {
         where: { id },
@@ -74,7 +77,7 @@ export class MessagesService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<Object> {
     try {
       const count = await this.model.destroy({ where: { id } });
 
