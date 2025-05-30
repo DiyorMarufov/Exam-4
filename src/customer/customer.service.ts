@@ -6,6 +6,7 @@ import { Customer } from './model/customer.model';
 import { Roles } from 'src/ENUM';
 import { UserSingInDto } from './dto/user-signIn-dto';
 import * as bcrypt from 'bcrypt';
+import { encrypt } from 'src/utils/encrypt-decrypt';
 @Injectable()
 export class CustomerService {
   constructor(
@@ -27,11 +28,11 @@ export class CustomerService {
         throw new BadRequestException('Phone number already exists');
       }
       const { password } = createCustomerDto;
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashed_password = await encrypt(password);
       const newCustomer = await this.customerModel.create({
         ...createCustomerDto,
         role: Roles.CUSTOMER,
-        hashedPassword,
+        hashed_password,
       });
       return newCustomer;
     } catch (error) {

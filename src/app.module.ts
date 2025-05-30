@@ -5,6 +5,9 @@ import { CustomerModule } from './customer/customer.module';
 import { ConfigModule } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Customer } from './customer/model/customer.model';
+import { Admin } from './admin/model/admin.model';
+import { JwtModule } from '@nestjs/jwt';
+import { Seller } from './seller/model/seller.model';
 
 @Module({
   imports: [
@@ -16,10 +19,11 @@ import { Customer } from './customer/model/customer.model';
       password: String(process.env.PG_PASS),
       database: process.env.PG_DB,
       logging: false,
-      models: [Customer],
+      models: [Customer, Admin, Seller],
       autoLoadModels: true,
-      sync: { alter: true },
+      sync: { force: true },
     }),
+    JwtModule.register({ global: true }),
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     CustomerModule,
     AdminModule,

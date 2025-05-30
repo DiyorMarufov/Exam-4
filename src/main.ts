@@ -3,7 +3,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 
-async function bootstrap() {
+async function start() {
   const PORT = Number(process.env.PORT) || 3001;
   const app = await NestFactory.create(AppModule, {
     logger: ['debug', 'error', 'warn'],
@@ -22,4 +22,4 @@ async function bootstrap() {
     console.log('Server started on port', PORT);
   });
 }
-bootstrap();
+start();
