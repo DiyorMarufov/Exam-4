@@ -16,6 +16,14 @@ import { Seller } from './seller/model/seller.model';
 import { SellerModule } from './seller/seller.module';
 import { AdminModule } from './admin/admin.module';
 import { Admin } from './admin/model/admin.model';
+import { products } from './products/models/product.model';
+import { ProductsModule } from './products/products.module';
+import { categories } from './categories/models/category.model';
+import { CategoriesModule } from './categories/categories.module';
+import { reports } from './reports/models/report.model';
+import { ReportsModule } from './reports/reports.module';
+import { reviews } from './rewiews/models/rewiew.models';
+import { RewiewsModule } from './rewiews/rewiews.module';
 import { MailModule } from './mail/mail.module';
 import { CacheModule, CacheInterceptor } from '@nestjs/cache-manager';
 import { APP_INTERCEPTOR } from '@nestjs/core';
@@ -36,7 +44,19 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
       synchronize: true,
       logging: false,
       autoLoadModels: true,
-      models: [Carts, CartItems, Orders, OrderItems, Admin, Customer, Seller],
+      models: [
+        Carts,
+        CartItems,
+        Orders,
+        OrderItems,
+        Admin,
+        Customer,
+        Seller,
+        products,
+        categories,
+        reports,
+        reviews,
+      ],
     }),
     CacheModule.register({
       isGlobal: true,
@@ -52,6 +72,10 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
     MailModule,
     CustomerModule,
     SellerModule,
+    ProductsModule,
+    CategoriesModule,
+    ReportsModule,
+    RewiewsModule,
   ],
   providers: [
     {

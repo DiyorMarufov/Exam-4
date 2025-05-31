@@ -1,17 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe, HttpStatus } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const PORT = Number(process.env.PORT);
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
+      transform: true,
       forbidNonWhitelisted: true,
-      errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
     }),
   );
-  const PORT = Number(process.env.PORT);
-  await app.listen(PORT, () => console.log(`Server is running on port`, PORT));
+  await app.listen(PORT, () => console.log(`Server is running on ${PORT}`));
 }
 bootstrap();
