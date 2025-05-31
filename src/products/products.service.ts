@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { products } from './models/product.model';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -51,12 +55,12 @@ export class ProductsService {
 
   async remove(id: number): Promise<object> {
     try {
-      const product = await this.productModel.destroy({where:{id}});
+      const product = await this.productModel.destroy({ where: { id } });
       if (!product) {
-        throw new BadRequestException(`Data with ID ${id} not found`)
+        throw new BadRequestException(`Data with ID ${id} not found`);
       }
-      return { 
-        data: {} 
+      return {
+        data: {},
       };
     } catch (error) {
       return catchError(error);

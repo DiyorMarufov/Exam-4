@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { categories } from './models/category.model';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -57,9 +61,9 @@ export class CategoriesService {
 
   async remove(id: number): Promise<object> {
     try {
-      const count =  await this.categoryModel.destroy({ where: { id } });
+      const count = await this.categoryModel.destroy({ where: { id } });
       if (count === 0) {
-        throw new BadRequestException(`Data with ${id} not found`)
+        throw new BadRequestException(`Data with ${id} not found`);
       }
       return {
         data: {},

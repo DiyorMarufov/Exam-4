@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { reports } from './models/report.model';
 import { CreateReportDto } from './dto/create-report.dto';
@@ -48,14 +52,14 @@ export class ReportsService {
 
   async remove(id: number): Promise<object> {
     try {
-      const count = await this.reportModel.destroy({where:{id}})
+      const count = await this.reportModel.destroy({ where: { id } });
 
-      if(count === 0){
-        throw new BadRequestException(`Data with ID ${id} not found`)
+      if (count === 0) {
+        throw new BadRequestException(`Data with ID ${id} not found`);
       }
-      return{
-        data: {}
-      }
+      return {
+        data: {},
+      };
     } catch (error) {
       return catchError(error);
     }

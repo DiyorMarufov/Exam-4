@@ -1,6 +1,5 @@
 import { IsString, IsNotEmpty, IsNumber, IsInt } from 'class-validator';
 
-
 export class CreateReviewDto {
   @IsNumber()
   @IsNotEmpty()

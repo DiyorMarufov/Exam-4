@@ -1,7 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { RewiewsService } from './rewiews.service';
 import { CreateReviewDto } from './dto/create-rewiew.dto';
-import { UpdateRewiewDto } from './dto/update-rewiew.dto';
+import { UpdateReviewDto } from './dto/update-rewiew.dto';
 
 @Controller('rewiews')
 export class RewiewsController {
@@ -23,7 +31,7 @@ export class RewiewsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRewiewDto: UpdateRewiewDto) {
+  update(@Param('id') id: string, @Body() updateRewiewDto: UpdateReviewDto) {
     return this.rewiewsService.update(+id, updateRewiewDto);
   }
 

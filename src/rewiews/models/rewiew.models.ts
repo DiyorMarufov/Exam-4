@@ -3,13 +3,13 @@ import { Table, Column, Model, DataType } from 'sequelize-typescript';
 @Table({ tableName: 'reviews' })
 export class reviews extends Model {
   @Column({
-    type: DataType.NUMBER,
+    type: DataType.INTEGER,
     allowNull: false,
   })
   buyer_id: number;
 
   @Column({
-    type: DataType.NUMBER,
+    type: DataType.INTEGER,
     allowNull: false,
   })
   product_id: number;
@@ -24,5 +24,5 @@ export class reviews extends Model {
     type: DataType.STRING,
     allowNull: false,
   })
-  comment:string;
+  comment: string;
 }
