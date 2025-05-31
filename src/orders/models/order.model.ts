@@ -4,6 +4,7 @@ import {
   Model,
   DataType,
   ForeignKey,
+  BelongsTo,
 } from 'sequelize-typescript';
 import { orderStatus } from '../../enums/order-status';
 import { deliveryMethod } from '../../enums/delivery-method';
@@ -17,6 +18,9 @@ export class Orders extends Model {
     allowNull: false,
   })
   buyer_id: number;
+
+  @BelongsTo(() => Customer)
+  customer: Customer;
 
   @Column({
     type: DataType.ENUM(

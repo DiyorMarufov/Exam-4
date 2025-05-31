@@ -4,8 +4,10 @@ import {
   Model,
   DataType,
   ForeignKey,
+  BelongsTo,
 } from 'sequelize-typescript';
 import { Carts } from '../../carts/models/cart.model';
+import { products } from '../../products/models/product.model';
 
 @Table({ tableName: 'cart-items' })
 export class CartItems extends Model {
@@ -16,10 +18,17 @@ export class CartItems extends Model {
   })
   cart_id: number;
 
+  @BelongsTo(() => Carts)
+  cart: Carts;
+
+  @ForeignKey(() => products)
   @Column({
     allowNull: true,
   })
-  product_id?: number;
+  product_id: number;
+
+  @BelongsTo(() => products)
+  products: products;
 
   @Column({
     type: DataType.INTEGER,

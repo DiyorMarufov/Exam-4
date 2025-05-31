@@ -1,18 +1,35 @@
-import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  ForeignKey,
+  BelongsTo,
+} from 'sequelize-typescript';
+import { products } from '../../products/models/product.model';
+import { Customer } from '../../customer/model/customer.model';
 
 @Table({ tableName: 'reviews' })
 export class reviews extends Model {
+  @ForeignKey(() => Customer)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
   buyer_id: number;
 
+  @BelongsTo(() => Customer)
+  customer: Customer;
+
+  @ForeignKey(() => products)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
   product_id: number;
+
+  @BelongsTo(() => products)
+  product: products;
 
   @Column({
     type: DataType.INTEGER,
@@ -24,5 +41,5 @@ export class reviews extends Model {
     type: DataType.STRING,
     allowNull: false,
   })
-  comment:string;
+  comment: string;
 }

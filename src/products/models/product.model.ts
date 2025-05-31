@@ -1,5 +1,14 @@
-import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  ForeignKey,
+  BelongsTo,
+} from 'sequelize-typescript';
 import { deliveryoptions } from 'src/enums/delivery.options';
+import { Seller } from '../../seller/model/seller.model';
+import { categories } from '../../categories/models/category.model';
 
 @Table({ tableName: 'products' })
 export class products extends Model {
@@ -43,15 +52,23 @@ export class products extends Model {
   })
   image: string;
 
+  @ForeignKey(() => Seller)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
   seller_id: number;
 
+  @BelongsTo(() => Seller)
+  seller: Seller;
+
+  @ForeignKey(() => categories)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
   category_id: number;
+
+  @BelongsTo(() => categories)
+  category: categories;
 }

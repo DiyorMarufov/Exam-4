@@ -1,4 +1,13 @@
-import { Column, DataType, Model, Table } from 'sequelize-typescript';
+import {
+  Column,
+  DataType,
+  Model,
+  Table,
+  HasOne,
+  HasMany,
+} from 'sequelize-typescript';
+import { Carts } from '../../carts/models/cart.model';
+import { Orders } from '../../orders/models/order.model';
 
 @Table({ tableName: 'customers' })
 export class Customer extends Model {
@@ -39,4 +48,10 @@ export class Customer extends Model {
     allowNull: false,
   })
   declare address: string;
+
+  @HasOne(() => Carts)
+  cart: Carts;
+
+  @HasMany(() => Orders)
+  order: Orders;
 }

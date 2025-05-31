@@ -12,6 +12,6 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  await app.listen(PORT, () => console.log(`Server is running on ${PORT}`));
+  await app.listen(PORT, () => console.log(`Server is running on`,PORT));
 }
 bootstrap();
