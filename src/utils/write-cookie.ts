@@ -1,4 +1,5 @@
 import { Response } from 'express';
+
 export const writeToCookie = (
   res: Response,
   dataName: string,

@@ -7,11 +7,11 @@ import {
 } from 'sequelize-typescript';
 import { orderStatus } from '../../enums/order-status';
 import { deliveryMethod } from '../../enums/delivery-method';
-import { Users } from '../../users/models/user.model';
+import { Customer } from '../../customer/model/customer.model';
 
 @Table({ tableName: 'orders' })
 export class Orders extends Model {
-  @ForeignKey(() => Users)
+  @ForeignKey(() => Customer)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,

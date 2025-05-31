@@ -7,20 +7,20 @@ import {
   BelongsTo,
   HasMany
 } from 'sequelize-typescript';
-import { Users } from '../../users/models/user.model';
+import {Customer} from "../../customer/model/customer.model"
 import { CartItems } from '../../cart-items/models/cart-item.model';
 
 @Table({ tableName: 'carts' })
 export class Carts extends Model {
-  @ForeignKey(() => Users)
+  @ForeignKey(() => Customer)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
   buyer_id: number;
 
-  @BelongsTo(() => Users)
-  user: Users;
+  @BelongsTo(() => Customer)
+  customer: Customer;
 
   @HasMany(() => CartItems)
   items: CartItems[];

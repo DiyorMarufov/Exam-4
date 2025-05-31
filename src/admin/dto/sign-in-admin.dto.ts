@@ -1,10 +1,10 @@
 import { IsNotEmpty, IsEmail } from 'class-validator';
 
-export class ConfirmSignInAdminDto {
+export class SignInAdminDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
 
   @IsNotEmpty()
-  otp: string;
+  password: string;
 }

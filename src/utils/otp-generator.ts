@@ -1,6 +1,6 @@
 import { generate } from 'otp-generator';
 
-export const generateOtp = () => {
+export const generateOTP = () => {
   return generate(6, {
     upperCaseAlphabets: false,
     lowerCaseAlphabets: false,

@@ -1,5 +1,5 @@
 import { Column, DataType, Model, Table } from 'sequelize-typescript';
-import { Roles, Status } from '../../enums/admin';
+import { Roles, Status } from 'src/enums';
 
 @Table({ tableName: 'admins' })
 export class Admin extends Model {
@@ -7,7 +7,7 @@ export class Admin extends Model {
     type: DataType.STRING,
     allowNull: false,
   })
-  full_name: string;
+  name: string;
 
   @Column({
     type: DataType.STRING,
@@ -21,7 +21,7 @@ export class Admin extends Model {
     unique: true,
     allowNull: false,
   })
-  phone_number: string;
+  phone: string;
 
   @Column({
     type: DataType.STRING,
@@ -34,7 +34,7 @@ export class Admin extends Model {
     allowNull: false,
     defaultValue: Roles.ADMIN,
   })
-  role: string;
+  role: Roles;
 
   @Column({
     type: DataType.ENUM(Status.ACTIVE, Status.INACTIVE),

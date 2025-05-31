@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Observable } from 'rxjs';
-import { Status } from '../enums/admin';
+import { Status } from '../enums/index';
 import { catchError } from '../utils/error-catch';
 
 @Injectable()
@@ -24,7 +24,7 @@ export class AuthGuard implements CanActivate {
         throw new UnauthorizedException('Unauthorizated');
       }
 
-      const [bearer,token] = auth.split(' ');
+      const [bearer, token] = auth.split(' ');
 
       if (bearer !== 'Bearer' || !token) {
         throw new UnauthorizedException('Token not found');

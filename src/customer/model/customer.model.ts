@@ -1,42 +1,42 @@
-import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { Column, DataType, Model, Table } from 'sequelize-typescript';
 
-@Table({ tableName: 'users' })
-export class Users extends Model {
+@Table({ tableName: 'customers' })
+export class Customer extends Model {
   @Column({
     type: DataType.STRING,
     allowNull: false,
   })
-  full_name: string;
+  declare name: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
     unique: true,
   })
-  email: string;
-  
+  declare email: string;
+
   @Column({
     type: DataType.STRING,
     allowNull: false,
     unique: true,
   })
-  phone: string;
+  declare phone: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
   })
-  password: string;
-
-  @Column({
-    type: DataType.ENUM('buyer', 'seller', 'admin', 'superadmin'),
-    defaultValue: "buyer",
-  })
-  role: string;
+  declare hashed_password: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
   })
-  address: string;
+  declare role: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  declare address: string;
 }
