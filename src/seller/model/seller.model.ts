@@ -1,10 +1,8 @@
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { Roles } from 'src/ENUM';
 
 @Table({ tableName: 'sellers' })
-export class Seller extends Model<Seller> {
-  @Column({ type: DataType.INTEGER, autoIncrement: true, primaryKey: true })
-  id: number;
-
+export class Seller extends Model {
   @Column({ type: DataType.STRING, allowNull: false })
   name: string;
 
@@ -18,8 +16,8 @@ export class Seller extends Model<Seller> {
   hashed_password: string;
 
   @Column({ type: DataType.STRING, allowNull: false })
-  role: string;
+  role: Roles.SELLER;
 
-  @Column({ type: DataType.TEXT, allowNull: false })
+  @Column({ type: DataType.STRING, allowNull: false })
   address: string;
 }

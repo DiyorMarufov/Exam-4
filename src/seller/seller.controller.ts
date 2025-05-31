@@ -1,16 +1,33 @@
-import { Controller, Post, Get, Param, Body, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Param,
+  Body,
+  Delete,
+  Res,
+} from '@nestjs/common';
+import { Response } from 'express';
 import { SellerService } from './seller.service';
 import { CreateSellerDto } from './dto/create-seller.dto';
+import { SignInSellerDto } from './dto/sing-in-seller.dto';
 
 @Controller('sellers')
 export class SellerController {
   constructor(private readonly sellerService: SellerService) {}
 
-  @Post()
-  create(@Body() createSellerDto: CreateSellerDto) {
-    return this.sellerService.create(createSellerDto);
+  @Post('sign-up')
+  signUp(@Body() createSellerDto: CreateSellerDto) {
+    return this.sellerService.signUp(createSellerDto);
   }
 
+  @Post('sign-in')
+  singIn(
+    @Body() signInSellerDto: SignInSellerDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.sellerService.signIn(signInSellerDto, res);
+  }
   @Get()
   findAll() {
     return this.sellerService.findAll();

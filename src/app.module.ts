@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { AdminModule } from './admin/admin.module';
-import { SellerModule } from './seller/seller.module';
 import { CustomerModule } from './customer/customer.module';
 import { ConfigModule } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
@@ -8,6 +7,7 @@ import { Customer } from './customer/model/customer.model';
 import { Admin } from './admin/model/admin.model';
 import { JwtModule } from '@nestjs/jwt';
 import { Seller } from './seller/model/seller.model';
+import { SellerModule } from './seller/seller.module';
 
 @Module({
   imports: [

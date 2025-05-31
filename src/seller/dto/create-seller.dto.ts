@@ -4,6 +4,7 @@ import {
   IsNotEmpty,
   IsStrongPassword,
   IsPhoneNumber,
+  IsOptional,
 } from 'class-validator';
 
 export class CreateSellerDto {
@@ -25,11 +26,7 @@ export class CreateSellerDto {
   @IsStrongPassword()
   password: string;
 
-  @IsNotEmpty()
-  @IsString()
-  role: string;
-
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   address: string;
 }
