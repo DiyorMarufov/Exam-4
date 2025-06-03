@@ -26,7 +26,7 @@ export class SellerController {
     @Body() signInSellerDto: SignInSellerDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return this.sellerService.signIn(signInSellerDto, res);
+    return this.sellerService.signIn({ signInSellerDto, res });
   }
   @Get()
   findAll() {

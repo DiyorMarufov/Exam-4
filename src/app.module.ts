@@ -8,6 +8,10 @@ import { Admin } from './admin/model/admin.model';
 import { JwtModule } from '@nestjs/jwt';
 import { Seller } from './seller/model/seller.model';
 import { SellerModule } from './seller/seller.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { Notification } from './notifications/model/notification.model';
+import { SellerProfilesModule } from './seller-profiles/seller-profiles.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -19,15 +23,18 @@ import { SellerModule } from './seller/seller.module';
       password: String(process.env.PG_PASS),
       database: process.env.PG_DB,
       logging: false,
-      models: [Customer, Admin, Seller],
+      models: [Customer, Admin, Seller, Notification],
       autoLoadModels: true,
-      sync: { force: true },
+      sync: { alter: true },
     }),
     JwtModule.register({ global: true }),
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     CustomerModule,
     AdminModule,
     SellerModule,
+    NotificationsModule,
+    SellerProfilesModule,
+    PaymentModule,
   ],
 })
 export class AppModule {}

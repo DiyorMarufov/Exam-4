@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Seller } from './model/seller.model';
 import { CreateSellerDto } from './dto/create-seller.dto';
@@ -47,10 +51,13 @@ export class SellerService {
     }
   }
 
-  async signIn(
-    signInSellerDto: SignInSellerDto,
-    res: Response,
-  ): Promise<object> {
+  async signIn({
+    signInSellerDto,
+    res,
+  }: {
+    signInSellerDto: SignInSellerDto;
+    res: Response;
+  }): Promise<object | undefined> {
     try {
       const { email, password } = signInSellerDto;
       const seller = await this.sellerModel.findOne({ where: { email } });
@@ -73,22 +80,38 @@ export class SellerService {
         data: accessToken,
       };
     } catch (error) {
-      return catchError(error);
+      catchError(error);
     }
   }
 
-  async findAll(): Promise<object> {
-    const sellers = await this.sellerModel.findAll();
-    return { statuscode: 200, data: { sellers } };
+  async findAll(): Promise<object | undefined> {
+    try {
+      const sellers = await this.sellerModel.findAll();
+      return { statuscode: 200, data: { sellers } };
+    } catch (error) {
+      catchError(error);
+    }
   }
 
-  async findOne(id: number): Promise<object> {
-    const seller = await this.sellerModel.findByPk(id);
-    return { statuscode: 200, data: { seller } };
+  async findOne(id: number): Promise<object | undefined> {
+    try {
+      const seller = await this.sellerModel.findByPk(id);
+      return { statuscode: 200, data: { seller } };
+    } catch (error) {
+      catchError(error);
+    }
   }
 
-  async remove(id: number): Promise<object> {
-    const seller = await this.sellerModel.destroy({ where: { id } });
-    return { statuscode: 200, data: {} };
+  async remove(id: number): Promise<object | undefined> {
+    try {
+      const sellerExists = this.sellerModel.findOne({ where: { id } });
+      if (!sellerExists) {
+        throw new NotFoundException('Bunday sotuvchi topilmadi');
+      }
+      const seller = await this.sellerModel.destroy({ where: { id } });
+      return { statuscode: 200, data: {} };
+    } catch (error) {
+      catchError(error);
+    }
   }
 }

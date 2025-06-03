@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { InjectModel } from '@nestjs/sequelize';
@@ -7,13 +11,14 @@ import { Roles } from 'src/ENUM';
 import { UserSingInDto } from './dto/user-signIn-dto';
 import * as bcrypt from 'bcrypt';
 import { encrypt } from 'src/utils/encrypt-decrypt';
+import { catchError } from '../utils/catch-error';
 @Injectable()
 export class CustomerService {
   constructor(
     @InjectModel(Customer) private readonly customerModel: typeof Customer,
   ) {}
 
-  async signUp(createCustomerDto: CreateCustomerDto) {
+  async signUp(createCustomerDto: CreateCustomerDto): Promise<object | undefined> {
     try {
       const existingEmail = await this.customerModel.findOne({
         where: { email: createCustomerDto.email },
@@ -36,48 +41,48 @@ export class CustomerService {
       });
       return newCustomer;
     } catch (error) {
-      return error.message;
+      catchError(error);
     }
   }
 
   async singIn(userSingInDto: UserSingInDto) {
-    const singInUser = {}; // token va boshqalarni yozman
+    const singInUser = {}; // token va boshqalarni yozman  : Promise<object | undefined>
   }
 
-  async findAll() {
+  async findAll(): Promise<object | undefined> {
     try {
       const allUser = await this.customerModel.findAll();
       return { statusCode: 200, data: allUser };
     } catch (error) {
-      return error.message;
+      return catchError(error);
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<object | undefined> {
     try {
       const user = await this.customerModel.findByPk(id);
       if (!user) {
-        throw new Error('User not found');
+        throw new NotFoundException('User not found');
       }
       return { statusCode: 200, data: user };
     } catch (error) {
-      return error.message;
+      catchError(error);
     }
   }
 
-  async update(id: number, updateCustomerDto: UpdateCustomerDto) {
+  async update(id: number, updateCustomerDto: UpdateCustomerDto): Promise<object | undefined> {
     try {
-      const updatedProduct = await this.customerModel.update(
+      const updatedCustomer = await this.customerModel.update(
         updateCustomerDto,
         { where: { id }, returning: true },
       );
-      return { statuscode: 200, data: updatedProduct[1][0] };
+      return { statuscode: 200, data: updatedCustomer[1][0] };
     } catch (error) {
-      return error.message;
+      catchError(error);
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<object | undefined> {
     try {
       const deletedUser = await this.customerModel.destroy({ where: { id } });
       if (!deletedUser) {
@@ -89,7 +94,7 @@ export class CustomerService {
         message: 'User successfully deleted ✅',
       };
     } catch (error) {
-      return error.message;
+      catchError(error);
     }
   }
 }
