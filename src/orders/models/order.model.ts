@@ -19,7 +19,7 @@ export class Orders extends Model {
   })
   buyer_id: number;
 
-  @BelongsTo(() => Customer)
+  @BelongsTo(() => Customer, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   customer: Customer;
 
   @Column({

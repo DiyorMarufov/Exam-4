@@ -1,10 +1,11 @@
 import {
   IsString,
   IsNotEmpty,
-  IsDecimal,
+  IsNumber,
   IsInt,
   IsEnum,
 } from 'class-validator';
+import {Type} from "class-transformer"
 import { deliveryoptions } from 'src/enums/delivery.options';
 
 export class CreateProductDto {
@@ -12,7 +13,8 @@ export class CreateProductDto {
   @IsNotEmpty()
   name: string;
 
-  @IsDecimal()
+  @IsNumber()
+  @Type(()=> Number)
   @IsNotEmpty()
   price: number;
 
@@ -21,6 +23,7 @@ export class CreateProductDto {
   description: string;
 
   @IsInt()
+  @Type(()=> Number)
   @IsNotEmpty()
   quantity: number;
 
@@ -32,15 +35,13 @@ export class CreateProductDto {
   @IsNotEmpty()
   delivery_options: deliveryoptions;
 
-  @IsString()
-  @IsNotEmpty()
-  image: string;
-
   @IsInt()
+  @Type(()=> Number)
   @IsNotEmpty()
   seller_id: number;
 
   @IsInt()
+  @Type(()=> Number)
   @IsNotEmpty()
   category_id: number;
 }

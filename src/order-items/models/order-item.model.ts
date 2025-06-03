@@ -18,7 +18,7 @@ export class OrderItems extends Model {
   })
   order_id: number;
 
-  @BelongsTo(() => Orders)
+  @BelongsTo(() => Orders, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   order: Orders;
 
   @ForeignKey(() => products)
@@ -28,7 +28,7 @@ export class OrderItems extends Model {
   })
   product_id: number;
 
-  @BelongsTo(() => products)
+  @BelongsTo(() => products, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   products: products;
 
   @Column({

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { catchError } from './error-catch';
 
 @Injectable()
 export class TokenService {
@@ -17,5 +18,21 @@ export class TokenService {
       secret: process.env.REFRESH_TOKEN_KEY,
       expiresIn: process.env.REFRESH_TOKEN_TIME,
     });
+  };
+
+  verifyAccessToken = (accessToken: string) => {
+    try {
+      return this.jwtService.decode(accessToken);
+    } catch (e) {
+      return catchError(e);
+    }
+  };
+
+  verifyRefreshToken = (refreshToken: string) => {
+    try {
+      return this.jwtService.decode(refreshToken);
+    } catch (e) {
+      return catchError(e);
+    }
   };
 }

@@ -30,7 +30,7 @@ export class CartItemsService {
       return {
         statusCode: 200,
         message: 'success',
-        data: await this.model.findAll(),
+        data: await this.model.findAll({ include: { all: true } }),
       };
     } catch (e) {
       return catchError(e);
@@ -39,7 +39,9 @@ export class CartItemsService {
 
   async findOne(id: number): Promise<Object> {
     try {
-      const cartItem = await this.model.findByPk(id);
+      const cartItem = await this.model.findByPk(id, {
+        include: { all: true },
+      });
 
       if (!cartItem) {
         throw new NotFoundException(`CartItem with ID ${id} not found`);

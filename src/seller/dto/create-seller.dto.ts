@@ -4,7 +4,10 @@ import {
   IsNotEmpty,
   IsStrongPassword,
   IsPhoneNumber,
+  IsEnum,
+  IsOptional,
 } from 'class-validator';
+import { Roles } from '../../enums';
 
 export class CreateSellerDto {
   @IsString()
@@ -25,9 +28,9 @@ export class CreateSellerDto {
   @IsStrongPassword()
   password: string;
 
-  @IsNotEmpty()
-  @IsString()
-  role: string;
+  @IsOptional()
+  @IsEnum([Roles.SUPERADMIN, Roles.ADMIN, Roles.SELLER, Roles.CUSTOMER])
+  role?: Roles.SELLER;
 
   @IsNotEmpty()
   @IsString()

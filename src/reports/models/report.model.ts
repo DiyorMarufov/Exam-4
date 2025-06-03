@@ -17,7 +17,7 @@ export class reports extends Model {
   })
   user_id: number;
 
-  @BelongsTo(() => Customer)
+  @BelongsTo(() => Customer, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   customer: Customer;
 
   @Column({

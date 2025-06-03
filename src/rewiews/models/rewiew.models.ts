@@ -18,7 +18,7 @@ export class reviews extends Model {
   })
   buyer_id: number;
 
-  @BelongsTo(() => Customer)
+  @BelongsTo(() => Customer, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   customer: Customer;
 
   @ForeignKey(() => products)
@@ -28,7 +28,7 @@ export class reviews extends Model {
   })
   product_id: number;
 
-  @BelongsTo(() => products)
+  @BelongsTo(() => products, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   product: products;
 
   @Column({

@@ -18,7 +18,10 @@ export class CartItems extends Model {
   })
   cart_id: number;
 
-  @BelongsTo(() => Carts)
+  @BelongsTo(() => Carts, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   cart: Carts;
 
   @ForeignKey(() => products)
@@ -27,7 +30,10 @@ export class CartItems extends Model {
   })
   product_id: number;
 
-  @BelongsTo(() => products)
+  @BelongsTo(() => products, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   products: products;
 
   @Column({

@@ -47,7 +47,7 @@ export class products extends Model {
   delivery_options: deliveryoptions;
 
   @Column({
-    type: DataType.STRING(100),
+    type: DataType.STRING,
     allowNull: false,
   })
   image: string;
@@ -59,7 +59,7 @@ export class products extends Model {
   })
   seller_id: number;
 
-  @BelongsTo(() => Seller)
+  @BelongsTo(() => Seller, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   seller: Seller;
 
   @ForeignKey(() => categories)
@@ -69,6 +69,6 @@ export class products extends Model {
   })
   category_id: number;
 
-  @BelongsTo(() => categories)
+  @BelongsTo(() => categories, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   category: categories;
 }

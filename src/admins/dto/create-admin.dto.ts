@@ -9,7 +9,7 @@ import {
 export class CreateAdminDto {
   @IsNotEmpty()
   @IsString()
-  name: string;
+  full_name: string;
 
   @IsNotEmpty()
   @IsEmail()
@@ -17,7 +17,7 @@ export class CreateAdminDto {
 
   @IsNotEmpty()
   @IsPhoneNumber('UZ')
-  phone: string;
+  phone_number: string;
 
   @IsNotEmpty()
   @IsStrongPassword()

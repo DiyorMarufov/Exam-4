@@ -14,8 +14,8 @@ import { Customer } from './customer/model/customer.model';
 import { CustomerModule } from './customer/customer.module';
 import { Seller } from './seller/model/seller.model';
 import { SellerModule } from './seller/seller.module';
-import { AdminModule } from './admin/admin.module';
-import { Admin } from './admin/model/admin.model';
+import { AdminsModule } from './admins/admins.module';
+import { Admin } from './admins/models/admin.model';
 import { products } from './products/models/product.model';
 import { ProductsModule } from './products/products.module';
 import { categories } from './categories/models/category.model';
@@ -27,6 +27,9 @@ import { RewiewsModule } from './rewiews/rewiews.module';
 import { MailModule } from './mail/mail.module';
 import { CacheModule, CacheInterceptor } from '@nestjs/cache-manager';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { resolve } from 'path';
+import { FileModule } from './file/file.module';
 
 @Module({
   imports: [
@@ -58,6 +61,10 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
         reviews,
       ],
     }),
+    ServeStaticModule.forRoot({
+      rootPath: resolve(__dirname, '..', '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
     CacheModule.register({
       isGlobal: true,
     }),
@@ -68,7 +75,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
     OrderItemsModule,
     CartsModule,
     CartItemsModule,
-    AdminModule,
+    AdminsModule,
     MailModule,
     CustomerModule,
     SellerModule,
@@ -76,6 +83,8 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
     CategoriesModule,
     ReportsModule,
     RewiewsModule,
+    AdminsModule,
+    FileModule,
   ],
   providers: [
     {

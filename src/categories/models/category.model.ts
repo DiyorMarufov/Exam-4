@@ -22,5 +22,5 @@ export class categories extends Model {
   image: string;
 
   @HasMany(() => products)
-  product: products;
+  product: products[];
 }
