@@ -23,6 +23,12 @@ import { CategoriesModule } from './categories/categories.module';
 import { reports } from './reports/models/report.model';
 import { ReportsModule } from './reports/reports.module';
 import { reviews } from './rewiews/models/rewiew.models';
+import { Notification } from './notifications/model/notification.model';
+import { NotificationsModule } from './notifications/notifications.module';
+import { Payment } from './payment/model/payment.model';
+import { PaymentModule } from './payment/payment.module';
+import { SellerProfile } from './seller-profiles/model/seller-profile.model';
+import { SellerProfilesModule } from './seller-profiles/seller-profiles.module';
 import { RewiewsModule } from './rewiews/rewiews.module';
 import { MailModule } from './mail/mail.module';
 import { CacheModule, CacheInterceptor } from '@nestjs/cache-manager';
@@ -59,6 +65,9 @@ import { FileModule } from './file/file.module';
         categories,
         reports,
         reviews,
+        Notification,
+        Payment,
+        SellerProfile,
       ],
     }),
     ServeStaticModule.forRoot({
@@ -85,6 +94,9 @@ import { FileModule } from './file/file.module';
     RewiewsModule,
     AdminsModule,
     FileModule,
+    NotificationsModule,
+    PaymentModule,
+    SellerProfilesModule,
   ],
   providers: [
     {

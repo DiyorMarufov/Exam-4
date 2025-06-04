@@ -6,11 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  Res,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
-import { UserSingInDto } from './dto/user-signIn-dto';
+import { UserSignInDto } from './dto/user-signIn-dto';
+import { Response } from 'express';
 
 @Controller('customer')
 export class CustomerController {
@@ -22,8 +25,11 @@ export class CustomerController {
   }
 
   @Post('sign-in')
-  singIn(@Body() userSingIN: UserSingInDto) {
-    return this.customerService.singIn(userSingIN);
+  signIn(
+    @Body() userSignInDto: UserSignInDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.customerService.signIn({ userSignInDto, res });
   }
 
   @Get()
@@ -32,20 +38,20 @@ export class CustomerController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.customerService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.customerService.findOne(id);
   }
 
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateCustomerDto: UpdateCustomerDto,
   ) {
-    return this.customerService.update(+id, updateCustomerDto);
+    return this.customerService.update(id, updateCustomerDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.customerService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.customerService.remove(id);
   }
 }

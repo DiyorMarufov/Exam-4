@@ -7,6 +7,7 @@ import {
   BelongsTo,
 } from 'sequelize-typescript';
 import { Customer } from '../../customer/model/customer.model';
+import { ReportType } from '../../enums/report-type';
 
 @Table({ tableName: 'reports' })
 export class reports extends Model {
@@ -21,10 +22,16 @@ export class reports extends Model {
   customer: Customer;
 
   @Column({
-    type: DataType.ENUM('bug', 'feature', 'feedback', 'abuse', 'other'),
+    type: DataType.ENUM(
+      ReportType.ABUSE,
+      ReportType.FEATURE,
+      ReportType.FEEDBACK,
+      ReportType.BUG,
+      ReportType.OTHER,
+    ),
     allowNull: false,
   })
-  report_type: string;
+  report_type: ReportType;
 
   @Column({
     type: DataType.TEXT,

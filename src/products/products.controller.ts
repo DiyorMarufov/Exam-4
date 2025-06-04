@@ -7,7 +7,8 @@ import {
   Param,
   Delete,
   UploadedFile,
-  UseInterceptors
+  UseInterceptors,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -23,7 +24,7 @@ export class ProductsController {
   @UseInterceptors(FileInterceptor('file'))
   create(
     @Body() createProductDto: CreateProductDto,
-    @UploadedFile(new ImageValidationPipe()) file: Express.Multer.File,
+    @UploadedFile(new ImageValidationPipe()) file?: Express.Multer.File,
   ) {
     return this.productsService.create(createProductDto, file);
   }
@@ -34,21 +35,22 @@ export class ProductsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productsService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.productsService.findOne(id);
   }
 
   @Patch(':id')
+  @UseInterceptors(FileInterceptor('file'))
   update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateProductDto: UpdateProductDto,
-    @UploadedFile(new ImageValidationPipe()) file: Express.Multer.File,
+    @UploadedFile(new ImageValidationPipe()) file?: Express.Multer.File,
   ) {
-    return this.productsService.update(+id, updateProductDto,file);
+    return this.productsService.update(id, updateProductDto, file);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productsService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.productsService.remove(id);
   }
 }

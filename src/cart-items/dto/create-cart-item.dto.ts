@@ -1,4 +1,4 @@
-import { IsInt, IsNumber, IsNotEmpty,IsOptional } from 'class-validator';
+import { IsInt, IsNumber, IsNotEmpty } from 'class-validator';
 
 export class CreateCartItemDto {
   @IsInt()
@@ -6,8 +6,8 @@ export class CreateCartItemDto {
   cart_id: number;
 
   @IsInt()
-  @IsOptional()
-  product_id?: number;
+  @IsNotEmpty()
+  product_id: number;
 
   @IsInt()
   @IsNotEmpty()

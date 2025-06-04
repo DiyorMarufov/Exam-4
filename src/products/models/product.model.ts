@@ -48,7 +48,6 @@ export class products extends Model {
 
   @Column({
     type: DataType.STRING,
-    allowNull: false,
   })
   image: string;
 

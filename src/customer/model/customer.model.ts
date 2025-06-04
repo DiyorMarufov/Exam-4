@@ -8,6 +8,7 @@ import {
 } from 'sequelize-typescript';
 import { Carts } from '../../carts/models/cart.model';
 import { Orders } from '../../orders/models/order.model';
+import { Roles } from '../../enums';
 
 @Table({ tableName: 'customers' })
 export class Customer extends Model {
@@ -15,7 +16,7 @@ export class Customer extends Model {
     type: DataType.STRING,
     allowNull: false,
   })
-  declare name: string;
+  declare full_name: string;
 
   @Column({
     type: DataType.STRING,
@@ -38,10 +39,15 @@ export class Customer extends Model {
   declare hashed_password: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: false,
+    type: DataType.ENUM(
+      Roles.SUPERADMIN,
+      Roles.ADMIN,
+      Roles.CUSTOMER,
+      Roles.SELLER,
+    ),
+    defaultValue: Roles.CUSTOMER,
   })
-  declare role: string;
+  declare role: Roles.CUSTOMER;
 
   @Column({
     type: DataType.STRING,

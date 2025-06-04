@@ -1,13 +1,14 @@
-import { IsString, IsNotEmpty, IsEnum, IsOptional, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum, IsInt } from 'class-validator';
+import { ReportType } from '../../enums/report-type';
 
 export class CreateReportDto {
-  @IsNumber()
-  @IsOptional()
+  @IsInt()
+  @IsNotEmpty()
   user_id: number;
 
-  @IsEnum(['bug', 'feature', 'feedback', 'abuse', 'other'])
+  @IsEnum(ReportType)
   @IsNotEmpty()
-  report_type: string;
+  report_type: ReportType;
 
   @IsString()
   @IsNotEmpty()

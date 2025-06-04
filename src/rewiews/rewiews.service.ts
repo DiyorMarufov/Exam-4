@@ -8,6 +8,7 @@ import { reviews } from './models/rewiew.models';
 import { CreateReviewDto } from './dto/create-rewiew.dto';
 import { UpdateRewiewDto } from './dto/update-rewiew.dto';
 import { catchError } from 'src/utils/error-catch';
+import { successRes } from '../utils/success-response';
 
 @Injectable()
 export class RewiewsService {
@@ -19,11 +20,7 @@ export class RewiewsService {
   async create(createReviewDto: CreateReviewDto): Promise<object> {
     try {
       const newReview = await this.reviewModel.create({ ...createReviewDto });
-      return {
-        statusCode: 201,
-        message: 'success',
-        data: newReview,
-      };
+      return successRes(newReview, 201);
     } catch (error) {
       return catchError(error);
     }
@@ -31,11 +28,7 @@ export class RewiewsService {
 
   async findAll(): Promise<object> {
     try {
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: await this.reviewModel.findAll(),
-      };
+      return successRes(await this.reviewModel.findAll());
     } catch (error) {
       return catchError(error);
     }
@@ -47,7 +40,7 @@ export class RewiewsService {
       if (!review) {
         throw new NotFoundException(`Review with ID ${id} not found`);
       }
-      return { statusCode: 200, message: 'success', data: review };
+      return successRes(review);
     } catch (error) {
       return catchError(error);
     }
@@ -65,11 +58,7 @@ export class RewiewsService {
           `Data with ID ${id} not updated or not found`,
         );
       }
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: rows[0],
-      };
+      return successRes(rows[0]);
     } catch (error) {
       return catchError(error);
     }
@@ -84,11 +73,7 @@ export class RewiewsService {
           `Data with ID ${id} not found or not deleted`,
         );
       }
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: {},
-      };
+      return successRes();
     } catch (error) {
       return catchError(error);
     }

@@ -12,7 +12,7 @@ import { Roles } from '../../enums';
 export class CreateSellerDto {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  full_name: string;
 
   @IsEmail()
   @IsNotEmpty()

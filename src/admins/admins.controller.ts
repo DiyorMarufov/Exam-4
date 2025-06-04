@@ -7,7 +7,6 @@ import {
   Body,
   UseGuards,
   Res,
-  Req,
   UseInterceptors,
   Param,
   ParseIntPipe,

@@ -26,6 +26,7 @@ export class CartItems extends Model {
 
   @ForeignKey(() => products)
   @Column({
+    type: DataType.INTEGER,
     allowNull: true,
   })
   product_id: number;

@@ -11,6 +11,7 @@ import { Carts } from '../carts/models/cart.model';
 import { OrderItems } from '../order-items/models/order-item.model';
 import { CartItems } from '../cart-items/models/cart-item.model';
 import { catchError } from '../utils/error-catch';
+import { successRes } from '../utils/success-response';
 
 @Injectable()
 export class OrdersService {
@@ -59,11 +60,7 @@ export class OrdersService {
         where: { id: cart_item_id },
       });
 
-      return {
-        statusCode: 201,
-        message: 'success',
-        data: newOrder,
-      };
+      return successRes(newOrder, 201);
     } catch (e) {
       return catchError(e);
     }
@@ -71,11 +68,7 @@ export class OrdersService {
 
   async findAll(): Promise<Object> {
     try {
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: await this.orderModel.findAll(),
-      };
+      return successRes(await this.orderModel.findAll());
     } catch (e) {
       return catchError(e);
     }
@@ -88,11 +81,7 @@ export class OrdersService {
         throw new NotFoundException(`Order with ID ${id} not found`);
       }
 
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: order,
-      };
+      return successRes(order);
     } catch (e) {
       return catchError(e);
     }
@@ -106,14 +95,12 @@ export class OrdersService {
       });
 
       if (count === 0) {
-        throw new BadRequestException(`Data not found or not updated`);
+        throw new BadRequestException(
+          `Data with ID ${id} not found or not updated`,
+        );
       }
 
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: rows[0],
-      };
+      return successRes(rows[0]);
     } catch (e) {
       return catchError(e);
     }
@@ -124,14 +111,12 @@ export class OrdersService {
       const count = await this.orderModel.destroy({ where: { id } });
 
       if (count === 0) {
-        throw new BadRequestException(`Data not deleted or not found`);
+        throw new BadRequestException(
+          `Data with ID ${id} not deleted or not found`,
+        );
       }
 
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: {},
-      };
+      return successRes();
     } catch (e) {
       return catchError(e);
     }

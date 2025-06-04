@@ -18,7 +18,7 @@ export class CreateOrderDto {
 
   @IsEnum(orderStatus)
   @IsOptional()
-  order_status: orderStatus = orderStatus.PENDING;
+  order_status?: orderStatus.PENDING;
 
   @IsEnum(deliveryMethod)
   @IsNotEmpty()

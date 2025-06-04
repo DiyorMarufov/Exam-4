@@ -4,20 +4,19 @@ import { products } from '../../products/models/product.model';
 @Table({ tableName: 'categories' })
 export class categories extends Model {
   @Column({
-    type: DataType.STRING(50),
+    type: DataType.STRING,
     allowNull: false,
   })
   name: string;
 
   @Column({
-    type: DataType.STRING(255),
+    type: DataType.STRING,
     allowNull: false,
   })
   description: string;
 
   @Column({
-    type: DataType.STRING(100),
-    allowNull: false,
+    type: DataType.STRING,
   })
   image: string;
 

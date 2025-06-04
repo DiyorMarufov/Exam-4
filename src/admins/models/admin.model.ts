@@ -31,15 +31,13 @@ export class Admin extends Model {
 
   @Column({
     type: DataType.ENUM(Roles.SUPERADMIN, Roles.ADMIN),
-    allowNull: false,
     defaultValue: Roles.ADMIN,
   })
-  role: string;
+  role: Roles.ADMIN;
 
   @Column({
     type: DataType.ENUM(Status.ACTIVE, Status.INACTIVE),
-    allowNull: false,
     defaultValue: Status.ACTIVE,
   })
-  status: string;
+  status: Status.ACTIVE;
 }

@@ -1,12 +1,11 @@
-import { IsString, IsNotEmpty, IsNumber, IsInt } from 'class-validator';
-
+import { IsString, IsNotEmpty, IsInt } from 'class-validator';
 
 export class CreateReviewDto {
-  @IsNumber()
+  @IsInt()
   @IsNotEmpty()
   buyer_id: number;
 
-  @IsNumber()
+  @IsInt()
   @IsNotEmpty()
   product_id: number;
 

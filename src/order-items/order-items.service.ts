@@ -4,6 +4,7 @@ import { UpdateOrderItemDto } from './dto/update-order-item.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { OrderItems } from './models/order-item.model';
 import { catchError } from '../utils/error-catch';
+import { successRes } from '../utils/success-response';
 
 @Injectable()
 export class OrderItemsService {
@@ -14,11 +15,7 @@ export class OrderItemsService {
 
   async findAll(): Promise<Object> {
     try {
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: await this.model.findAll(),
-      };
+      return successRes(await this.model.findAll());
     } catch (e) {
       return catchError(e);
     }
@@ -32,11 +29,7 @@ export class OrderItemsService {
         throw new NotFoundException(`OrderItem with ID ${id} not found`);
       }
 
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: orderItem,
-      };
+      return successRes(orderItem);
     } catch (e) {
       return catchError(e);
     }

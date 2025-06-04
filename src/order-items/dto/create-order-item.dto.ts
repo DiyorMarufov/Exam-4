@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsOptional, IsDecimal } from 'class-validator';
+import { IsInt, IsNotEmpty, IsNumber } from 'class-validator';
 
 export class CreateOrderItemDto {
   @IsInt()
@@ -6,14 +6,14 @@ export class CreateOrderItemDto {
   order_id: number;
 
   @IsInt()
-  @IsOptional()
-  product_id?: number;
+  @IsNotEmpty()
+  product_id: number;
 
   @IsInt()
   @IsNotEmpty()
   quantity: number;
 
-  @IsDecimal()
+  @IsNumber()
   @IsNotEmpty()
   price: number;
 }

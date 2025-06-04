@@ -8,6 +8,7 @@ import { UpdateCartItemDto } from './dto/update-cart-item.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { CartItems } from './models/cart-item.model';
 import { catchError } from '../utils/error-catch';
+import { successRes } from '../utils/success-response';
 
 @Injectable()
 export class CartItemsService {
@@ -15,11 +16,7 @@ export class CartItemsService {
   async create(createCartItemDto: CreateCartItemDto): Promise<Object> {
     try {
       const newCartItems = await this.model.create({ ...createCartItemDto });
-      return {
-        statusCode: 201,
-        message: 'success',
-        data: newCartItems,
-      };
+      return successRes(newCartItems, 201);
     } catch (e) {
       return catchError(e);
     }
@@ -27,11 +24,7 @@ export class CartItemsService {
 
   async findAll(): Promise<Object> {
     try {
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: await this.model.findAll({ include: { all: true } }),
-      };
+      return successRes(await this.model.findAll({ include: { all: true } }));
     } catch (e) {
       return catchError(e);
     }
@@ -46,11 +39,7 @@ export class CartItemsService {
       if (!cartItem) {
         throw new NotFoundException(`CartItem with ID ${id} not found`);
       }
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: cartItem,
-      };
+      return successRes(cartItem);
     } catch (e) {
       return catchError(e);
     }
@@ -68,15 +57,11 @@ export class CartItemsService {
 
       if (count === 0) {
         throw new BadRequestException(
-          `UpdatedCartItem not found or not updated`,
+          `UpdatedCartItem with ID ${id} not found or not updated`,
         );
       }
 
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: rows[0],
-      };
+      return successRes(rows[0]);
     } catch (e) {
       return catchError(e);
     }
@@ -87,14 +72,12 @@ export class CartItemsService {
       const count = await this.model.destroy({ where: { id } });
 
       if (count === 0) {
-        throw new BadRequestException(`Data not deleted or not found`);
+        throw new BadRequestException(
+          `Data with ID ${id} not deleted or not found`,
+        );
       }
 
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: {},
-      };
+      return successRes();
     } catch (e) {
       return catchError(e);
     }

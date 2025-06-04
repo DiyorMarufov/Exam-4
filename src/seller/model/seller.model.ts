@@ -5,7 +5,7 @@ import { Roles } from '../../enums/index';
 @Table({ tableName: 'sellers' })
 export class Seller extends Model {
   @Column({ type: DataType.STRING, allowNull: false })
-  name: string;
+  full_name: string;
 
   @Column({ type: DataType.STRING, allowNull: false, unique: true })
   email: string;
@@ -17,9 +17,9 @@ export class Seller extends Model {
   hashed_password: string;
 
   @Column({ type: DataType.STRING, defaultValue: Roles.SELLER })
-  role?: Roles;
+  role?: Roles.SELLER;
 
-  @Column({ type: DataType.TEXT, allowNull: false })
+  @Column({ type: DataType.STRING, allowNull: false })
   address: string;
 
   @HasMany(() => products)

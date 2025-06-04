@@ -3,8 +3,9 @@ import { existsSync, mkdirSync, unlink, writeFile } from 'fs';
 import { extname, join, resolve } from 'path';
 import { catchError } from '../utils/error-catch';
 import { v4 } from 'uuid';
-import {config} from "dotenv"
-config()
+import { config } from 'dotenv';
+config();
+
 @Injectable()
 export class FileService {
   private readonly baseUrl = String(process.env.BASE_URL);
@@ -24,8 +25,40 @@ export class FileService {
           res();
         });
       });
-      
+
       return `${this.baseUrl}${fileName}`;
+    } catch (e) {
+      return catchError(e);
+    }
+  }
+
+  async deleteFile(fileName: string) {
+    try {
+      fileName = fileName.split(String(process.env.BASE_URL))[1];
+      const file = resolve(this.filePath, fileName);
+      if (!existsSync(file)) {
+        throw new BadRequestException(`File does not exist: ${fileName}`);
+      }
+      await new Promise<void>((res, rej) => {
+        unlink(file, (err) => {
+          if (err) rej(err);
+          res();
+        });
+      });
+    } catch (e) {
+      return catchError(e);
+    }
+  }
+
+  async existsFile(fileName: string): Promise<boolean> {
+    try {
+      fileName = fileName.split(String(process.env.BASE_URL))[1];
+      const file = resolve(this.filePath, fileName);
+
+      if (existsSync(file)) {
+        return true;
+      }
+      return false;
     } catch (e) {
       return catchError(e);
     }

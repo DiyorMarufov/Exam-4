@@ -31,7 +31,7 @@ export class Orders extends Model {
     ),
     defaultValue: orderStatus.PENDING,
   })
-  order_status: orderStatus;
+  order_status: orderStatus.PENDING;
 
   @Column({
     type: DataType.ENUM(

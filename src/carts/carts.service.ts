@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Carts } from '../carts/models/cart.model';
 import { catchError } from '../utils/error-catch';
+import { successRes } from '../utils/success-response';
 
 @Injectable()
 export class CartsService {
@@ -9,8 +10,7 @@ export class CartsService {
 
   async findAll(): Promise<Object> {
     try {
-      const carts = await this.model.findAll({ include: { all: true } });
-      return carts;
+      return successRes(await this.model.findAll({ include: { all: true } }));
     } catch (err) {
       return catchError(err);
     }
@@ -23,7 +23,7 @@ export class CartsService {
       if (!cart) {
         throw new NotFoundException(`User with ID ${id} not found`);
       }
-      return cart;
+      return successRes(cart);
     } catch (err) {
       return catchError(err);
     }

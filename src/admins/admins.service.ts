@@ -2,7 +2,6 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  InternalServerErrorException,
   UnauthorizedException,
   OnModuleInit,
   NotFoundException,
@@ -15,6 +14,7 @@ import { Admin } from './models/admin.model';
 import { decrypt, encrypt } from '../utils/encrypt-decrypt';
 import { Roles } from '../enums/index';
 import { catchError } from '../utils/error-catch';
+import { successRes } from '../utils/success-response';
 import { SignInAdminDto } from './dto/signin-admin-dto';
 import { ConfirmSignInAdminDto } from './dto/confirm-signin-admin';
 import { TokenService } from '../utils/generate-token';
@@ -52,7 +52,7 @@ export class AdminService implements OnModuleInit {
         });
       }
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      return catchError(error);
     }
   }
 
@@ -80,11 +80,7 @@ export class AdminService implements OnModuleInit {
         await this.tokenService.generateRefreshToken(payload);
 
       writeToCookie(res, 'refreshTokenSuperAdmin', refreshToken);
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: accessToken,
-      };
+      return successRes(accessToken);
     } catch (error) {
       return catchError(error);
     }
@@ -94,7 +90,7 @@ export class AdminService implements OnModuleInit {
     try {
       const decodedToken =
         await this.tokenService.verifyRefreshToken(refreshToken);
-      
+
       if (!decodedToken) {
         throw new UnauthorizedException(`Refresh token expired`);
       }
@@ -110,11 +106,7 @@ export class AdminService implements OnModuleInit {
       const payload = { id, role, status };
       const accessToken = await this.tokenService.generateAccessToken(payload);
 
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: accessToken,
-      };
+      return successRes(accessToken);
     } catch (e) {
       return catchError(e);
     }
@@ -140,11 +132,7 @@ export class AdminService implements OnModuleInit {
         ...createAdminDto,
         hashed_password: hashedPassword,
       });
-      return {
-        statusCode: 201,
-        message: 'success',
-        data: admin,
-      };
+      return successRes(admin, 201);
     } catch (error) {
       return catchError(error);
     }
@@ -168,11 +156,7 @@ export class AdminService implements OnModuleInit {
       await this.mailService.sendOtp(email, otp);
       await this.cacheManager.set(email, otp, 120000);
 
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: email,
-      };
+      return successRes(email);
     } catch (error) {
       return catchError(error);
     }
@@ -198,11 +182,7 @@ export class AdminService implements OnModuleInit {
         await this.tokenService.generateRefreshToken(payload);
 
       writeToCookie(res, 'refreshTokenAdmin', refreshToken);
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: accessToken,
-      };
+      return successRes(accessToken);
     } catch (e) {
       return catchError(e);
     }
@@ -228,11 +208,7 @@ export class AdminService implements OnModuleInit {
       const payload = { id, role, status };
       const accessToken = await this.tokenService.generateAccessToken(payload);
 
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: accessToken,
-      };
+      return successRes(accessToken);
     } catch (e) {
       return catchError(e);
     }
@@ -255,10 +231,7 @@ export class AdminService implements OnModuleInit {
       }
       res.clearCookie('refreshTokenAdmin');
 
-      return {
-        statusCode: 200,
-        message: 'Admin signed out successfully',
-      };
+      return successRes(`Signed out successfully`);
     } catch (e) {
       return catchError(e);
     }
@@ -266,11 +239,7 @@ export class AdminService implements OnModuleInit {
 
   async getAllAdmins(): Promise<object> {
     try {
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: await this.adminModel.findAll(),
-      };
+      return successRes(await this.adminModel.findAll());
     } catch (e) {
       return catchError(e);
     }
@@ -292,29 +261,25 @@ export class AdminService implements OnModuleInit {
         );
       }
 
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: rows[0],
-      };
+      return successRes(rows[0]);
     } catch (e) {
       return catchError(e);
     }
   }
 
   async deleteAdmin(id: number): Promise<object> {
-    const count = await this.adminModel.destroy({ where: { id } });
+    try {
+      const count = await this.adminModel.destroy({ where: { id } });
 
-    if (!count) {
-      throw new BadRequestException(
-        `Data with ID ${id} not found or not deleted`,
-      );
+      if (!count) {
+        throw new BadRequestException(
+          `Data with ID ${id} not found or not deleted`,
+        );
+      }
+
+      return successRes();
+    } catch (e) {
+      return catchError(e);
     }
-
-    return {
-      statusCode: 200,
-      message: 'success',
-      data: {},
-    };
   }
 }
