@@ -9,18 +9,30 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { catchError } from 'src/utils/error-catch';
 import { successRes } from '../utils/success-response';
+import { FileService } from '../file/file.service';
 
 @Injectable()
 export class CategoriesService {
   constructor(
     @InjectModel(categories)
     private readonly categoryModel: typeof categories,
+    private readonly fileService: FileService,
   ) {}
 
-  async create(createCategoryDto: CreateCategoryDto): Promise<object> {
+  async create(
+    createCategoryDto: CreateCategoryDto,
+    file?: Express.Multer.File,
+  ): Promise<object> {
     try {
+      let image: undefined | string;
+
+      if (file) {
+        image = await this.fileService.createFile(file);
+      }
+
       const category = await this.categoryModel.create({
         ...createCategoryDto,
+        image,
       });
       return successRes(category);
     } catch (error) {
@@ -30,7 +42,10 @@ export class CategoriesService {
 
   async findAll(): Promise<object> {
     try {
-      return successRes(await this.categoryModel.findAll());
+      const categories = await this.categoryModel.findAll({
+        include: { all: true },
+      });
+      return successRes(categories);
     } catch (error) {
       return catchError(error);
     }
@@ -38,9 +53,11 @@ export class CategoriesService {
 
   async findOne(id: number): Promise<object> {
     try {
-      const category = await this.categoryModel.findByPk(id);
+      const category = await this.categoryModel.findByPk(id, {
+        include: { all: true },
+      });
       if (!category) {
-        throw new NotFoundException(`IDsi ${id} bolgan kategoriya topilmadi`);
+        throw new NotFoundException(`Category with ID ${id} not found`);
       }
       return successRes(category);
     } catch (error) {
@@ -51,20 +68,33 @@ export class CategoriesService {
   async update(
     id: number,
     updateCategoryDto: UpdateCategoryDto,
+    file?: Express.Multer.File,
   ): Promise<object> {
     try {
-      const [count, rows] = await this.categoryModel.update(updateCategoryDto, {
-        where: { id },
-        returning: true,
-      });
+      const category = await this.categoryModel.findByPk(id);
 
-      if (!count) {
-        throw new BadRequestException(
-          `Data with ID ${id} not found or not updated`,
-        );
+      if (!category) {
+        throw new NotFoundException(`Category with ID ${id} not found`);
       }
 
-      return successRes(rows[0]);
+      let image = category.dataValues.image;
+
+      if (file) {
+        if (image && (await this.fileService.existsFile(image))) {
+          await this.fileService.deleteFile(image);
+        }
+        image = await this.fileService.createFile(file);
+      }
+
+      const updatedCategory = await this.categoryModel.update(
+        {
+          ...updateCategoryDto,
+          image,
+        },
+        { where: { id }, returning: true },
+      );
+
+      return successRes(updatedCategory[1][0]);
     } catch (e) {
       return catchError(e);
     }
@@ -72,12 +102,17 @@ export class CategoriesService {
 
   async remove(id: number): Promise<object> {
     try {
-      const count = await this.categoryModel.destroy({ where: { id } });
-      if (!count) {
-        throw new BadRequestException(
-          `Data with ID ${id} not found or not deleted`,
-        );
+      const category = await this.categoryModel.findByPk(id);
+
+      if (!category) {
+        throw new NotFoundException(`Category with ID ${id} not found`);
       }
+
+      const { image } = category?.dataValues;
+      if (image && (await this.fileService.existsFile(image))) {
+        await this.fileService.deleteFile(image);
+      }
+      await this.categoryModel.destroy({ where: { id } });
       return successRes();
     } catch (error) {
       return catchError(error);

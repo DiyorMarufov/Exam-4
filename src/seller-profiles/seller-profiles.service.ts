@@ -33,7 +33,10 @@ export class SellerProfilesDbService {
 
   async findAll(): Promise<object | undefined> {
     try {
-      return successRes(await this.sellerProfileModel.findAll());
+      const sellerProfiles = await this.sellerProfileModel.findAll({
+        include: { all: true },
+      });
+      return successRes(sellerProfiles);
     } catch (error) {
       return catchError(error);
     }
@@ -41,7 +44,9 @@ export class SellerProfilesDbService {
 
   async findOne(id: number): Promise<object | undefined> {
     try {
-      const sellerProfile = await this.sellerProfileModel.findByPk(id);
+      const sellerProfile = await this.sellerProfileModel.findByPk(id, {
+        include: { all: true },
+      });
       if (!sellerProfile) {
         throw new NotFoundException(`Seller profile with ID ${id} not found`);
       }

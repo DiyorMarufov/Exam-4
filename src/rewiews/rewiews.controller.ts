@@ -26,6 +26,11 @@ export class RewiewsController {
     return this.rewiewsService.findAll();
   }
 
+  @Get('seller/:id')
+  getAverageRating(@Param('id', ParseIntPipe) id: number) {
+    return this.rewiewsService.getAverageRating(id);
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.rewiewsService.findOne(id);

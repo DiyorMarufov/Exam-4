@@ -16,9 +16,11 @@ import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { SignInAdminDto } from './dto/signin-admin-dto';
 import { ConfirmSignInAdminDto } from './dto/confirm-signin-admin';
-import { AuthGuard } from '../guards/auth.guard';
+import { StatusAdminDto } from './dto/active-deactive-admin.dto';
 import { CacheInterceptor } from '@nestjs/cache-manager';
+import { AuthGuard } from '../guards/auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
+import { SelfGuard } from '../guards/self.guard';
 import { Response } from 'express';
 import { Roles } from '../enums/index';
 import { checkRoles } from '../decorators/role.decorator';
@@ -77,11 +79,22 @@ export class AdminsController {
     return this.adminsService.signOutAdmin(refreshToken, res);
   }
 
-  @Get(`admins`)
+  @UseGuards(AuthGuard, RolesGuard)
+  @checkRoles(Roles.SUPERADMIN)
+  @Get()
   getAllAdmins() {
     return this.adminsService.getAllAdmins();
   }
 
+  @UseGuards(AuthGuard, SelfGuard)
+  @checkRoles(Roles.SUPERADMIN, Roles.ADMIN)
+  @Get(':id')
+  getAdminById(@Param('id', ParseIntPipe) id: number) {
+    return this.adminsService.getAdminById(id);
+  }
+
+  @UseGuards(AuthGuard, SelfGuard)
+  @checkRoles(Roles.SUPERADMIN, Roles.ADMIN)
   @Patch(`:id`)
   updateAdmin(
     @Param('id', ParseIntPipe) id: number,
@@ -90,7 +103,19 @@ export class AdminsController {
     return this.adminsService.updateAdmin(id, updateAdminDto);
   }
 
-  @Delete('id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @checkRoles(Roles.SUPERADMIN)
+  @Patch('status/:id')
+  updateStatusAdmin(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() statusDto: StatusAdminDto,
+  ) {
+    return this.adminsService.activeDeactiveAdmin(id, statusDto);
+  }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @checkRoles(Roles.SUPERADMIN)
+  @Delete(':id')
   deleteAdmin(@Param('id', ParseIntPipe) id: number) {
     return this.adminsService.deleteAdmin(id);
   }

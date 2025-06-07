@@ -19,7 +19,7 @@ export class products extends Model {
   name: string;
 
   @Column({
-    type: DataType.DECIMAL,
+    type: DataType.DECIMAL(10, 2),
     allowNull: false,
   })
   price: number;

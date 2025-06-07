@@ -24,7 +24,8 @@ export class CartItemsService {
 
   async findAll(): Promise<Object> {
     try {
-      return successRes(await this.model.findAll({ include: { all: true } }));
+      const cartItems = await this.model.findAll({ include: { all: true } });
+      return successRes(cartItems);
     } catch (e) {
       return catchError(e);
     }

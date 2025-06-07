@@ -23,6 +23,6 @@ export class SellerProfile extends Model {
   @Column({ type: DataType.STRING, allowNull: false })
   contact_info: string;
 
-  @Column({ type: DataType.FLOAT, allowNull: false })
+  @Column({ type: DataType.FLOAT })
   average_rating: number;
 }

@@ -5,10 +5,12 @@ import {
   DataType,
   ForeignKey,
   BelongsTo,
+  HasMany,
 } from 'sequelize-typescript';
 import { orderStatus } from '../../enums/order-status';
 import { deliveryMethod } from '../../enums/delivery-method';
 import { Customer } from '../../customer/model/customer.model';
+import { OrderItems } from '../../order-items/models/order-item.model';
 
 @Table({ tableName: 'orders' })
 export class Orders extends Model {
@@ -21,6 +23,9 @@ export class Orders extends Model {
 
   @BelongsTo(() => Customer, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   customer: Customer;
+
+  @HasMany(() => OrderItems)
+  orderItem: OrderItems[];
 
   @Column({
     type: DataType.ENUM(

@@ -4,10 +4,10 @@ import { MailerService } from '@nestjs-modules/mailer';
 @Injectable()
 export class MailService {
   constructor(private readonly mailService: MailerService) {}
-  async sendOtp(email: string, otp: string) {
+  async sendOtp(email: string, text: string, otp: string) {
     await this.mailService.sendMail({
       to: email,
-      subject: `Welcome to Online Marketplace`,
+      subject: text,
       text: otp,
     });
   }

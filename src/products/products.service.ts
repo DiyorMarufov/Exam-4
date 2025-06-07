@@ -10,11 +10,16 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { catchError } from 'src/utils/error-catch';
 import { FileService } from '../file/file.service';
 import { successRes } from '../utils/success-response';
+import { Seller } from '../seller/model/seller.model';
+import { categories } from '../categories/models/category.model';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectModel(products) private productModel: typeof products,
+    @InjectModel(Seller) private sellerModel: typeof Seller,
+    @InjectModel(categories) private categoryModel: typeof categories,
     private readonly fileService: FileService,
   ) {}
 
@@ -40,9 +45,54 @@ export class ProductsService {
     }
   }
 
-  async findAll(): Promise<object> {
+  async findAll(query: any): Promise<object> {
     try {
-      return successRes(await this.productModel.findAll());
+      const where: any = {};
+      const categoryWhere: any = {};
+
+      if (query.name) {
+        where.name = {
+          [Op.iLike]: `%${query.name}%`,
+        };
+      }
+
+      if (query.min_price && query.max_price) {
+        where.price = {
+          [Op.between]: [Number(query.min_price), Number(query.max_price)],
+        };
+      } else if (query.min_price) {
+        where.price = {
+          [Op.gte]: Number(query.min_price),
+        };
+      } else if (query.max_price) {
+        where.price = {
+          [Op.lte]: Number(query.max_price),
+        };
+      }
+
+      if (query.category_id) {
+        where.category_id = Number(query.category_id);
+      }
+
+      if (query.category_name) {
+        categoryWhere.name = {
+          [Op.iLike]: `%${query.category_name}%`,
+        };
+      }
+
+      const products = await this.productModel.findAll({
+        where,
+        include: [
+          { model: Seller, attributes: ['full_name','phone'] },
+          {
+            model: categories,
+            where: Object.keys(categoryWhere).length
+              ? categoryWhere
+              : undefined,
+          },
+        ],
+      });
+      return successRes(products);
     } catch (error) {
       return catchError(error);
     }
@@ -50,7 +100,15 @@ export class ProductsService {
 
   async findOne(id: number): Promise<object> {
     try {
-      const product = await this.productModel.findByPk(id);
+      const product = await this.productModel.findByPk(id, {
+        include: [
+          {
+            model: this.sellerModel,
+            attributes: ['full_name', 'phone_number'],
+          },
+          { model: this.categoryModel },
+        ],
+      });
       if (!product) {
         throw new NotFoundException(`Product with ID ${id} not found`);
       }

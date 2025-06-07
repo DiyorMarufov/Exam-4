@@ -1,7 +1,6 @@
 import {
   IsEmail,
   IsNotEmpty,
-  IsPhoneNumber,
   IsStrongPassword,
 } from 'class-validator';
 
@@ -9,10 +8,6 @@ export class UserSignInDto {
   @IsEmail({}, { message: 'Please enter a valid email address!' })
   @IsNotEmpty({ message: 'Email is required' })
   email: string;
-
-  @IsPhoneNumber('UZ', { message: 'Please enter a valid phone number!' })
-  @IsNotEmpty({ message: 'Phone number is required' })
-  phone: string;
 
   @IsNotEmpty({ message: 'Password is required' })
   @IsStrongPassword(

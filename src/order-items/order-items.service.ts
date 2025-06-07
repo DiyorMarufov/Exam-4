@@ -15,7 +15,8 @@ export class OrderItemsService {
 
   async findAll(): Promise<Object> {
     try {
-      return successRes(await this.model.findAll());
+      const orderItems = await this.model.findAll({ include: { all: true } });
+      return successRes(orderItems);
     } catch (e) {
       return catchError(e);
     }
@@ -23,7 +24,9 @@ export class OrderItemsService {
 
   async findOne(id: number): Promise<Object> {
     try {
-      const orderItem = await this.model.findByPk(id);
+      const orderItem = await this.model.findByPk(id, {
+        include: { all: true },
+      });
 
       if (!orderItem) {
         throw new NotFoundException(`OrderItem with ID ${id} not found`);

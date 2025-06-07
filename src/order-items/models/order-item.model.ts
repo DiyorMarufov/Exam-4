@@ -38,7 +38,7 @@ export class OrderItems extends Model {
   quantity: number;
 
   @Column({
-    type: DataType.DECIMAL,
+    type: DataType.DECIMAL(10, 2),
     allowNull: false,
   })
   price: number;

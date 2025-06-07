@@ -31,7 +31,10 @@ export class NotificationsService {
 
   async findAll(): Promise<object | undefined> {
     try {
-      return successRes(await this.notificationModel.findAll());
+      const notifications = await this.notificationModel.findAll({
+        include: { all: true },
+      });
+      return successRes(notifications);
     } catch (error) {
       return catchError(error);
     }
@@ -39,7 +42,9 @@ export class NotificationsService {
 
   async findOne(id: number): Promise<object | undefined> {
     try {
-      const notification = await this.notificationModel.findByPk(id);
+      const notification = await this.notificationModel.findByPk(id, {
+        include: { all: true },
+      });
       if (!notification) {
         throw new NotFoundException(`Notification with ID ${id} not found`);
       }

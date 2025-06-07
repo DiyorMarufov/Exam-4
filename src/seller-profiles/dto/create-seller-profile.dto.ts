@@ -12,8 +12,4 @@ export class CreateSellerProfileDto {
   @IsString()
   @IsNotEmpty()
   contact_info: string;
-
-  @IsNumber()
-  @IsNotEmpty()
-  average_rating: number;
 }

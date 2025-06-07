@@ -1,4 +1,4 @@
-import { IsInt, IsNumber, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsInt, IsNumber, IsEnum, IsNotEmpty } from 'class-validator';
 import { PaymentMethod } from '../../enums/payment-method';
 
 export class CreatePaymentDto {
@@ -13,8 +13,4 @@ export class CreatePaymentDto {
   @IsEnum(PaymentMethod)
   @IsNotEmpty()
   payment_method: PaymentMethod;
-
-  @IsString()
-  @IsNotEmpty()
-  receipt_number: string;
 }

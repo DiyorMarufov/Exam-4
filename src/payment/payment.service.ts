@@ -9,28 +9,98 @@ import { CreatePaymentDto } from './dto/create-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
 import { catchError } from '../utils/error-catch';
 import { successRes } from '../utils/success-response';
+import { Orders } from '../orders/models/order.model';
+import { OrderItems } from '../order-items/models/order-item.model';
+import { products } from '../products/models/product.model';
+import { Sequelize } from 'sequelize-typescript';
+import { v4 } from 'uuid';
 
 @Injectable()
 export class PaymentService {
   constructor(
     @InjectModel(Payment)
     private paymentModel: typeof Payment,
+    @InjectModel(Orders)
+    private orderModel: typeof Orders,
+    @InjectModel(OrderItems)
+    private orderItemModel: typeof OrderItems,
+    @InjectModel(products)
+    private productModel: typeof products,
+    private sequelize: Sequelize,
   ) {}
 
   async create(createPaymentDto: CreatePaymentDto): Promise<object> {
+    const transaction = await this.sequelize.transaction();
     try {
+      const { order_id } = createPaymentDto;
+
+      const orderItems = await this.orderItemModel.findAll({
+        where: { order_id },
+        include: [this.productModel],
+        transaction,
+      });
+
+      for (const orderItem of orderItems) {
+        const { products } = orderItem?.dataValues;
+        const product = products.dataValues;
+        const item = orderItem?.dataValues;
+
+        if (!product) {
+          throw new NotFoundException(
+            `Product with ID ${item.product_id} not found`,
+          );
+        }
+
+        // const calculatedUnitPrice = Number(item.price) / item.quantity;
+        // const actualUnitPrice = Number(product.price);
+
+        // if (Math.abs(calculatedUnitPrice - actualUnitPrice) > 0.01) {
+        //   throw new BadRequestException(
+        //     `Price incorrect: It should match to product price`,
+        //   );
+        // }
+
+        if (product.quantity < item.quantity) {
+          throw new BadRequestException(
+            `Not enough stock for product with ID ${item.product_id}`,
+          );
+        }
+        await this.productModel.update(
+          {
+            quantity: product.quantity - item.quantity,
+          },
+          { where: { id: product.id }, transaction },
+        );
+      }
+
+      await this.orderModel.update(
+        {
+          order_status: `shipped`,
+        },
+        { where: { id: order_id }, transaction },
+      );
+
+      const receipt_number = v4();
+
       const newPayment = await this.paymentModel.create({
         ...createPaymentDto,
+        receipt_number,
       });
-      return successRes(newPayment, 201);
+      await transaction.commit();
+
+      return successRes(newPayment);
     } catch (error) {
+      await transaction.rollback();
       return catchError(error);
     }
   }
 
   async findAll(): Promise<object | undefined> {
     try {
-      return successRes(await this.paymentModel.findAll());
+      const payments = await this.paymentModel.findAll({
+        include: { all: true },
+      });
+      return successRes(payments);
     } catch (error) {
       return catchError(error);
     }
@@ -38,7 +108,9 @@ export class PaymentService {
 
   async findOne(id: number): Promise<object | undefined> {
     try {
-      const payment = await this.paymentModel.findByPk(id);
+      const payment = await this.paymentModel.findByPk(id, {
+        include: { all: true },
+      });
       if (!payment) {
         throw new NotFoundException(`Payment with ID ${id} not found`);
       }

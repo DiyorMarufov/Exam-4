@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
+import { StatusAdminDto } from './dto/active-deactive-admin.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { Admin } from './models/admin.model';
 import { decrypt, encrypt } from '../utils/encrypt-decrypt';
@@ -132,7 +133,15 @@ export class AdminService implements OnModuleInit {
         ...createAdminDto,
         hashed_password: hashedPassword,
       });
-      return successRes(admin, 201);
+
+      return successRes(
+        {
+          full_name: admin.full_name,
+          email: admin.email,
+          phone_number: admin.phone_number,
+        },
+        201,
+      );
     } catch (error) {
       return catchError(error);
     }
@@ -153,7 +162,11 @@ export class AdminService implements OnModuleInit {
       }
 
       const otp = generateOTP();
-      await this.mailService.sendOtp(email, otp);
+      await this.mailService.sendOtp(
+        email,
+        'Welcome to onlin marketplace',
+        otp,
+      );
       await this.cacheManager.set(email, otp, 120000);
 
       return successRes(email);
@@ -239,7 +252,21 @@ export class AdminService implements OnModuleInit {
 
   async getAllAdmins(): Promise<object> {
     try {
-      return successRes(await this.adminModel.findAll());
+      const admins = await this.adminModel.findAll();
+      return successRes(admins);
+    } catch (e) {
+      return catchError(e);
+    }
+  }
+
+  async getAdminById(id: number): Promise<object> {
+    try {
+      const admin = await this.adminModel.findByPk(id);
+      if (!admin) {
+        throw new NotFoundException(`Admin with ID ${id} not found`);
+      }
+      const { full_name, email, phone_number } = admin?.dataValues;
+      return successRes({ full_name, email, phone_number });
     } catch (e) {
       return catchError(e);
     }
@@ -250,7 +277,14 @@ export class AdminService implements OnModuleInit {
     updateAdminDto: UpdateAdminDto,
   ): Promise<object> {
     try {
-      const [count, rows] = await this.adminModel.update(updateAdminDto, {
+      const updatedAdmin: any = { ...updateAdminDto };
+
+      if (updatedAdmin.password) {
+        updatedAdmin.hashed_password = await encrypt(updatedAdmin.password);
+      }
+      delete updatedAdmin.password;
+
+      const [count, rows] = await this.adminModel.update(updatedAdmin, {
         where: { id },
         returning: true,
       });
@@ -260,8 +294,27 @@ export class AdminService implements OnModuleInit {
           `Data with ID ${id} not found or not updated`,
         );
       }
+      const { full_name, email, phone_number } = rows[0]?.dataValues;
+      return successRes({ full_name, email, phone_number });
+    } catch (e) {
+      return catchError(e);
+    }
+  }
 
-      return successRes(rows[0]);
+  async activeDeactiveAdmin(id: number, statusDto: StatusAdminDto) {
+    try {
+      const admin = await this.adminModel.findByPk(id);
+      if (!admin) {
+        throw new NotFoundException(`Admin with ID ${id} not found`);
+      }
+      const updatedAdmin = await this.adminModel.update(
+        {
+          ...statusDto,
+        },
+        { where: { id }, returning: true },
+      );
+
+      return successRes(updatedAdmin[1][0]);
     } catch (e) {
       return catchError(e);
     }

@@ -25,7 +25,10 @@ export class ReportsService {
 
   async findAll(): Promise<object> {
     try {
-      return successRes(await this.reportModel.findAll());
+      const reports = await this.reportModel.findAll({
+        include: { all: true },
+      });
+      return successRes(reports);
     } catch (error) {
       return catchError(error);
     }
@@ -33,7 +36,9 @@ export class ReportsService {
 
   async findOne(id: number): Promise<object> {
     try {
-      const report = await this.reportModel.findByPk(id);
+      const report = await this.reportModel.findByPk(id, {
+        include: { all: true },
+      });
       if (!report) {
         throw new NotFoundException(`Report with ID ${id} not found`);
       }

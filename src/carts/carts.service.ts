@@ -10,7 +10,8 @@ export class CartsService {
 
   async findAll(): Promise<Object> {
     try {
-      return successRes(await this.model.findAll({ include: { all: true } }));
+      const carts = await this.model.findAll({ include: { all: true } });
+      return successRes(carts);
     } catch (err) {
       return catchError(err);
     }

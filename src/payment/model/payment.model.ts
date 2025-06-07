@@ -22,7 +22,7 @@ export class Payment extends Model {
   order: Orders;
 
   @Column({
-    type: DataType.DECIMAL,
+    type: DataType.DECIMAL(10, 2),
     allowNull: false,
   })
   amount: number;

@@ -14,7 +14,7 @@ export class CreateCustomerDto {
     message:
       'Name can only contain letters, spaces, and hyphens and length between 3 and 30',
   })
-  name: string;
+  full_name: string;
 
   @IsEmail({}, { message: 'Please enter a valid email address!' })
   @IsNotEmpty({ message: 'Email is required' })
