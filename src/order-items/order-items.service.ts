@@ -1,10 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { CreateOrderItemDto } from './dto/create-order-item.dto';
 import { UpdateOrderItemDto } from './dto/update-order-item.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { OrderItems } from './models/order-item.model';
 import { catchError } from '../utils/error-catch';
 import { successRes } from '../utils/success-response';
+import { Orders } from '../orders/models/order.model';
 
 @Injectable()
 export class OrderItemsService {
@@ -16,6 +21,21 @@ export class OrderItemsService {
   async findAll(): Promise<Object> {
     try {
       const orderItems = await this.model.findAll({ include: { all: true } });
+      return successRes(orderItems);
+    } catch (e) {
+      return catchError(e);
+    }
+  }
+
+  async findAllForCustomer(req: any): Promise<Object> {
+    try {
+      const orderItems = await this.model.findAll({
+        include: { model: Orders, where: { buyer_id: req.user.id } },
+      });
+
+      if (!orderItems) {
+        throw new ForbiddenException(`You are not the owner of this product`);
+      }
       return successRes(orderItems);
     } catch (e) {
       return catchError(e);

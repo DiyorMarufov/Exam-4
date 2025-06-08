@@ -2,9 +2,9 @@ import { IsNotEmpty, IsString, IsEnum, IsInt } from 'class-validator';
 import { NotificationType } from '../../enums/notification.type';
 
 export class CreateNotificationDto {
-  @IsNotEmpty({ message: 'User_id is required' })
-  @IsInt({ message: 'user_id must be a string' })
-  user_id: number;
+  @IsNotEmpty({ message: 'customer_id is required' })
+  @IsInt({ message: 'customer_id must be an integer' })
+  customer_id: number;
 
   @IsString({ message: 'notification_text must  be a string' })
   @IsNotEmpty({ message: 'Email is required' })

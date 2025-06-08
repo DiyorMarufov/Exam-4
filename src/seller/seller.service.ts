@@ -57,7 +57,15 @@ export class SellerService {
         hashed_password,
         role: Roles.SELLER,
       });
-      return successRes(newSeller, 201);
+      return successRes(
+        {
+          full_name: newSeller.dataValues.full_name,
+          email: newSeller.dataValues.email,
+          phone: newSeller.dataValues.phone,
+          address: newSeller.dataValues.address,
+        },
+        201,
+      );
     } catch (error) {
       return catchError(error);
     }
@@ -178,7 +186,10 @@ export class SellerService {
   async findAll(): Promise<object | undefined> {
     try {
       const sellers = await this.sellerModel.findAll({
-        include: { all: true },
+        attributes: ['full_name', 'email', 'phone'],
+        include: {
+          model: products,
+        },
       });
       return successRes(sellers);
     } catch (error) {
@@ -189,7 +200,10 @@ export class SellerService {
   async findOne(id: number): Promise<object | undefined> {
     try {
       const seller = await this.sellerModel.findByPk(id, {
-        include: { all: true },
+        attributes: ['full_name', 'email', 'phone'],
+        include: {
+          model: products,
+        },
       });
       if (!seller) {
         throw new NotFoundException(`Seller with ID ${id} not found`);

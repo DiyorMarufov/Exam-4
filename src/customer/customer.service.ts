@@ -64,7 +64,15 @@ export class CustomerService {
         buyer_id: newCustomer.id,
       });
 
-      return successRes(newCustomer);
+      return successRes(
+        {
+          full_name: newCustomer.dataValues.full_name,
+          email: newCustomer.dataValues.email,
+          phone: newCustomer.dataValues.phone,
+          address: newCustomer.dataValues.address,
+        },
+        201,
+      );
     } catch (error) {
       return catchError(error);
     }
@@ -238,7 +246,9 @@ export class CustomerService {
     }
   }
 
-  async recoverPassCustomer(verifyPasswordCustomerDto: VerifyPasswordCustomerDto) {
+  async recoverPassCustomer(
+    verifyPasswordCustomerDto: VerifyPasswordCustomerDto,
+  ) {
     try {
       const { email, password, confirmPassword } = verifyPasswordCustomerDto;
 
@@ -252,7 +262,7 @@ export class CustomerService {
           `Password should match with confirm password`,
         );
       }
-      
+
       const hashed_password = await encrypt(password);
       await this.customerModel.update(
         { hashed_password },

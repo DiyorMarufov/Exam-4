@@ -18,7 +18,10 @@ export class Payment extends Model {
   })
   order_id: number;
 
-  @BelongsTo(() => Orders)
+  @BelongsTo(() => Orders, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   order: Orders;
 
   @Column({

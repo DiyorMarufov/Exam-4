@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Notification } from './model/notification.model';
@@ -34,6 +35,24 @@ export class NotificationsService {
       const notifications = await this.notificationModel.findAll({
         include: { all: true },
       });
+      return successRes(notifications);
+    } catch (error) {
+      return catchError(error);
+    }
+  }
+
+  async findAllForCustomer(req: any): Promise<object | undefined> {
+    try {
+      const notifications = await this.notificationModel.findAll({
+        where: { customer_id: req.user.id },
+        include: { all: true },
+      });
+
+      if (!notifications) {
+        throw new ForbiddenException(
+          `You are not the owner of this notification`,
+        );
+      }
       return successRes(notifications);
     } catch (error) {
       return catchError(error);

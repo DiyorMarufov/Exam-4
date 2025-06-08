@@ -5,9 +5,9 @@ import {
   DataType,
   ForeignKey,
   BelongsTo,
-  HasMany
+  HasMany,
 } from 'sequelize-typescript';
-import {Customer} from "../../customer/model/customer.model"
+import { Customer } from '../../customer/model/customer.model';
 import { CartItems } from '../../cart-items/models/cart-item.model';
 
 @Table({ tableName: 'carts' })
@@ -19,7 +19,10 @@ export class Carts extends Model {
   })
   buyer_id: number;
 
-  @BelongsTo(() => Customer)
+  @BelongsTo(() => Customer, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   customer: Customer;
 
   @HasMany(() => CartItems)

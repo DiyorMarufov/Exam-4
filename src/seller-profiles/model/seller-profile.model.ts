@@ -14,7 +14,10 @@ export class SellerProfile extends Model {
   @Column({ type: DataType.INTEGER, allowNull: false })
   seller_id: number;
 
-  @BelongsTo(() => Seller)
+  @BelongsTo(() => Seller, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   seller: Seller;
 
   @Column({ type: DataType.STRING, allowNull: false })

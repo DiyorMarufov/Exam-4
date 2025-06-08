@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Payment } from './model/payment.model';
@@ -51,15 +52,6 @@ export class PaymentService {
           );
         }
 
-        // const calculatedUnitPrice = Number(item.price) / item.quantity;
-        // const actualUnitPrice = Number(product.price);
-
-        // if (Math.abs(calculatedUnitPrice - actualUnitPrice) > 0.01) {
-        //   throw new BadRequestException(
-        //     `Price incorrect: It should match to product price`,
-        //   );
-        // }
-
         if (product.quantity < item.quantity) {
           throw new BadRequestException(
             `Not enough stock for product with ID ${item.product_id}`,
@@ -106,6 +98,21 @@ export class PaymentService {
     }
   }
 
+  async findAllForCustomer(req: any): Promise<object | undefined> {
+    try {
+      const payments = await this.paymentModel.findAll({
+        include: { model: Orders, where: { buyer_id: req.user.id } },
+      });
+
+      if (!payments) {
+        throw new ForbiddenException(`You are not the owner of this payment`);
+      }
+      return successRes(payments);
+    } catch (error) {
+      return catchError(error);
+    }
+  }
+
   async findOne(id: number): Promise<object | undefined> {
     try {
       const payment = await this.paymentModel.findByPk(id, {
@@ -114,6 +121,7 @@ export class PaymentService {
       if (!payment) {
         throw new NotFoundException(`Payment with ID ${id} not found`);
       }
+
       return successRes(payment);
     } catch (error) {
       return catchError(error);

@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { reviews } from './models/rewiew.models';
@@ -11,7 +12,7 @@ import { catchError } from 'src/utils/error-catch';
 import { successRes } from '../utils/success-response';
 import { products } from '../products/models/product.model';
 import { SellerProfile } from '../seller-profiles/model/seller-profile.model';
-import { Sequelize } from 'sequelize-typescript';
+import { Customer } from '../customer/model/customer.model';
 
 @Injectable()
 export class RewiewsService {
@@ -36,7 +37,10 @@ export class RewiewsService {
   async findAll(): Promise<object> {
     try {
       const reviews = await this.reviewModel.findAll({
-        include: { all: true },
+        include: [
+          { model: Customer, attributes: ['full_name', 'email', 'phone'] },
+          { model: products },
+        ],
       });
       return successRes(reviews);
     } catch (error) {
@@ -97,7 +101,10 @@ export class RewiewsService {
   async findOne(id: number): Promise<object> {
     try {
       const review = await this.reviewModel.findByPk(id, {
-        include: { all: true },
+        include: [
+          { model: Customer, attributes: ['full_name', 'email', 'phone'] },
+          { model: products },
+        ],
       });
       if (!review) {
         throw new NotFoundException(`Review with ID ${id} not found`);
@@ -108,33 +115,42 @@ export class RewiewsService {
     }
   }
 
-  async update(id: number, updateReviewDto: UpdateRewiewDto): Promise<object> {
+  async update(
+    id: number,
+    updateReviewDto: UpdateRewiewDto,
+    req: any,
+  ): Promise<object> {
     try {
-      const [count, rows] = await this.reviewModel.update(updateReviewDto, {
-        where: { id },
-        returning: true,
-      });
+      const review = await this.reviewModel.findByPk(id);
 
-      if (!count) {
-        throw new BadRequestException(
-          `Data with ID ${id} not updated or not found`,
-        );
+      if (!review) {
+        throw new NotFoundException(`Review with ID ${id} not found`);
       }
-      return successRes(rows[0]);
+      
+      if (review.dataValues.buyer_id !== req.user.id) {
+        throw new ForbiddenException(`You are not the owner of this review`);
+      }
+
+      await review.update(updateReviewDto);
+      return successRes(review);
     } catch (error) {
       return catchError(error);
     }
   }
 
-  async remove(id: number): Promise<object> {
+  async remove(id: number, req: any): Promise<object> {
     try {
-      const count = await this.reviewModel.destroy({ where: { id } });
+      const review = await this.reviewModel.findByPk(id);
 
-      if (count === 0) {
-        throw new BadRequestException(
-          `Data with ID ${id} not found or not deleted`,
-        );
+      if (!review) {
+        throw new NotFoundException(`Review with ID ${id} not found`);
       }
+
+      if (review.dataValues.buyer_id !== req.user.id) {
+        throw new ForbiddenException(`You are not the owner of this review`);
+      }
+
+      await review.destroy();
       return successRes();
     } catch (error) {
       return catchError(error);

@@ -11,6 +11,7 @@ import {
   UseInterceptors,
   ParseIntPipe,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -22,7 +23,6 @@ import { AuthGuard } from '../guards/auth.guard';
 import { checkRoles } from '../decorators/role.decorator';
 import { Roles } from '../enums/index';
 import { RolesGuard } from '../guards/roles.guard';
-
 
 @Controller('products')
 export class ProductsController {
@@ -44,25 +44,28 @@ export class ProductsController {
     return this.productsService.findAll(query);
   }
 
-  @UseGuards(AuthGuard, SellerGuard)
-  @checkRoles(Roles.SUPERADMIN, Roles.ADMIN, Roles.SELLER)
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.findOne(id);
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @checkRoles(Roles.SUPERADMIN, Roles.ADMIN, Roles.SELLER)
   @Patch(':id')
   @UseInterceptors(FileInterceptor('file'))
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateProductDto: UpdateProductDto,
     @UploadedFile(new ImageValidationPipe()) file?: Express.Multer.File,
+    @Req() req?,
   ) {
-    return this.productsService.update(id, updateProductDto, file);
+    return this.productsService.update(id, updateProductDto, file, req);
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @checkRoles(Roles.SUPERADMIN, Roles.ADMIN, Roles.SELLER)
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.productsService.remove(id);
+  remove(@Param('id', ParseIntPipe) id: number, @Req() req?) {
+    return this.productsService.remove(id, req);
   }
 }

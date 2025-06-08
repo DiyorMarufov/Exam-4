@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -12,6 +13,7 @@ import { OrderItems } from '../order-items/models/order-item.model';
 import { CartItems } from '../cart-items/models/cart-item.model';
 import { catchError } from '../utils/error-catch';
 import { successRes } from '../utils/success-response';
+import { Sequelize } from 'sequelize-typescript';
 
 @Injectable()
 export class OrdersService {
@@ -20,14 +22,17 @@ export class OrdersService {
     @InjectModel(Carts) private cartModel: typeof Carts,
     @InjectModel(OrderItems) private orderItemModel: typeof OrderItems,
     @InjectModel(CartItems) private cartItemModel: typeof CartItems,
+    private sequelize: Sequelize,
   ) {}
   async createOrderFromCart(createOrderDto: CreateOrderDto): Promise<Object> {
+    const transaction = await this.sequelize.transaction();
     try {
       const { buyer_id, cart_item_id } = createOrderDto;
 
       const cart = await this.cartModel.findOne({
         where: { buyer_id },
         include: [CartItems],
+        transaction,
       });
 
       if (!cart || !cart.dataValues.items.length) {
@@ -45,6 +50,7 @@ export class OrdersService {
       const newOrder = await this.orderModel.create({
         ...createOrderDto,
         order_status: 'pending',
+        transaction,
       });
 
       const newOrderItems = selectedItems.map((item: any) => ({
@@ -54,14 +60,17 @@ export class OrdersService {
         price: item.dataValues.price,
       }));
 
-      await this.orderItemModel.bulkCreate(newOrderItems);
+      await this.orderItemModel.bulkCreate(newOrderItems, { transaction });
 
       await this.cartItemModel.destroy({
         where: { id: cart_item_id },
+        transaction,
       });
 
+      await transaction.commit();
       return successRes(newOrder, 201);
     } catch (e) {
+      await transaction.rollback();
       return catchError(e);
     }
   }
@@ -75,13 +84,29 @@ export class OrdersService {
     }
   }
 
-  async findOne(id: number): Promise<Object> {
+  async findAllForCustomer(req: any): Promise<Object> {
+    try {
+      const orders = await this.orderModel.findAll({
+        where: { buyer_id: req.user.id },
+        include: { all: true },
+      });
+      return successRes(orders);
+    } catch (e) {
+      return catchError(e);
+    }
+  }
+
+  async findOne(id: number, req: any): Promise<Object> {
     try {
       const order = await this.orderModel.findByPk(id, {
         include: { all: true },
       });
       if (!order) {
         throw new NotFoundException(`Order with ID ${id} not found`);
+      }
+
+      if (order.dataValues.buyer_id !== req.user.id) {
+        throw new ForbiddenException(`You are not the owner of this product`);
       }
 
       return successRes(order);

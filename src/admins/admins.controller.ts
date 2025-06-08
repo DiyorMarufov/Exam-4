@@ -86,6 +86,13 @@ export class AdminsController {
     return this.adminsService.getAllAdmins();
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @checkRoles(Roles.SUPERADMIN, Roles.ADMIN)
+  @Get('active-customers')
+  getActiveCustomers() {
+    return this.adminsService.getActiveCustomers();
+  }
+
   @UseGuards(AuthGuard, SelfGuard)
   @checkRoles(Roles.SUPERADMIN, Roles.ADMIN)
   @Get(':id')

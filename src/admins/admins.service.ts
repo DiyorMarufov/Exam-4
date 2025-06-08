@@ -25,11 +25,13 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { writeToCookie } from '../utils/write-cookie';
 import { Response } from 'express';
+import { Customer } from '../customer/model/customer.model';
 
 @Injectable()
 export class AdminService implements OnModuleInit {
   constructor(
     @InjectModel(Admin) private adminModel: typeof Admin,
+    @InjectModel(Customer) private customerModel: typeof Customer,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly mailService: MailService,
     private readonly tokenService: TokenService,
@@ -136,9 +138,9 @@ export class AdminService implements OnModuleInit {
 
       return successRes(
         {
-          full_name: admin.full_name,
-          email: admin.email,
-          phone_number: admin.phone_number,
+          full_name: admin.dataValues.full_name,
+          email: admin.dataValues.email,
+          phone_number: admin.dataValues.phone_number,
         },
         201,
       );
@@ -267,6 +269,32 @@ export class AdminService implements OnModuleInit {
       }
       const { full_name, email, phone_number } = admin?.dataValues;
       return successRes({ full_name, email, phone_number });
+    } catch (e) {
+      return catchError(e);
+    }
+  }
+
+  async getActiveCustomers() {
+    try {
+      const customers = await this.customerModel.findAll({
+        include: { all: true },
+      });
+
+      let maxOrderCustomer: number = -Infinity;
+      let customerId: number = 0;
+
+      for (let item of customers) {
+        const order = item.dataValues.order;
+
+        if (order.length > maxOrderCustomer) {
+          maxOrderCustomer = order.length;
+          customerId = item.id;
+        }
+      }
+
+      return successRes(
+        `Customer with ID ${customerId} has the highest number of orders: ${maxOrderCustomer}`,
+      );
     } catch (e) {
       return catchError(e);
     }

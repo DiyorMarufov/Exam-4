@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { CreateCartItemDto } from './dto/create-cart-item.dto';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
@@ -22,7 +23,7 @@ export class CartItemsService {
     }
   }
 
-  async findAll(): Promise<Object> {
+  async findAllCartItems(): Promise<Object> {
     try {
       const cartItems = await this.model.findAll({ include: { all: true } });
       return successRes(cartItems);
@@ -31,15 +32,32 @@ export class CartItemsService {
     }
   }
 
-  async findOne(id: number): Promise<Object> {
+  async findAll(req: any) {
     try {
-      const cartItem = await this.model.findByPk(id, {
+      
+      const cartItems = await this.model.findAll({
+        where: { cart_id: req.user.id },
         include: { all: true },
       });
 
+      return successRes(cartItems);
+    } catch (e) {
+      return catchError(e);
+    }
+  }
+
+  async findOne(id: number, req: any): Promise<Object> {
+    try {
+      const cartItem = await this.model.findByPk(id);
+      
       if (!cartItem) {
-        throw new NotFoundException(`CartItem with ID ${id} not found`);
+        throw new NotFoundException(`Cart Item with ID ${id} not found`);
       }
+
+      if (cartItem.dataValues.cart_id !== req.user.id) {
+        throw new ForbiddenException(`This cart item does not belong to you`);
+      }
+
       return successRes(cartItem);
     } catch (e) {
       return catchError(e);
@@ -49,34 +67,40 @@ export class CartItemsService {
   async update(
     id: number,
     updateCartItemDto: UpdateCartItemDto,
+    req: any,
   ): Promise<Object> {
     try {
-      const [count, rows] = await this.model.update(updateCartItemDto, {
-        where: { id },
-        returning: true,
-      });
+      const cartItem = await this.model.findByPk(id);
 
-      if (count === 0) {
-        throw new BadRequestException(
-          `UpdatedCartItem with ID ${id} not found or not updated`,
-        );
+      if (!cartItem) {
+        throw new NotFoundException(`Cart item with ID ${id} not found`);
       }
 
-      return successRes(rows[0]);
+      if (cartItem.dataValues.cart_id !== req.user.id) {
+        throw new ForbiddenException(`This cart item does not belong to you`);
+      }
+
+      const updated = await cartItem.update(updateCartItemDto);
+
+      return successRes(updated);
     } catch (e) {
       return catchError(e);
     }
   }
 
-  async remove(id: number): Promise<Object> {
+  async remove(id: number, req: any): Promise<Object> {
     try {
-      const count = await this.model.destroy({ where: { id } });
+      const cartItem = await this.model.findByPk(id);
 
-      if (count === 0) {
-        throw new BadRequestException(
-          `Data with ID ${id} not deleted or not found`,
-        );
+      if (!cartItem) {
+        throw new NotFoundException(`Cart item with ID ${id} not found`);
       }
+
+      if (cartItem.dataValues.cart_id !== req.user.id) {
+        throw new ForbiddenException(`This cart item does not belong to you`);
+      }
+
+      await cartItem.destroy()
 
       return successRes();
     } catch (e) {

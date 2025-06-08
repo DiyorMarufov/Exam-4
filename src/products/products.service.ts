@@ -1,7 +1,7 @@
 import {
-  BadRequestException,
   Injectable,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { products } from './models/product.model';
@@ -49,6 +49,7 @@ export class ProductsService {
     try {
       const where: any = {};
       const categoryWhere: any = {};
+      const sellerWhere: any = {};
 
       if (query.name) {
         where.name = {
@@ -80,10 +81,23 @@ export class ProductsService {
         };
       }
 
+      if (query.seller_id) {
+        where.seller_id = Number(query.seller_id);
+      }
+
+      if (query.seller_name) {
+        sellerWhere.full_name = {
+          [Op.iLike]: `%${query.seller_name}%`,
+        };
+      }
       const products = await this.productModel.findAll({
         where,
         include: [
-          { model: Seller, attributes: ['full_name','phone'] },
+          {
+            model: Seller,
+            attributes: ['full_name', 'email', 'phone'],
+            where: Object.keys(sellerWhere).length ? sellerWhere : undefined,
+          },
           {
             model: categories,
             where: Object.keys(categoryWhere).length
@@ -104,7 +118,7 @@ export class ProductsService {
         include: [
           {
             model: this.sellerModel,
-            attributes: ['full_name', 'phone_number'],
+            attributes: ['full_name', 'email', 'phone'],
           },
           { model: this.categoryModel },
         ],
@@ -122,11 +136,16 @@ export class ProductsService {
     id: number,
     updateProductDto: UpdateProductDto,
     file?: Express.Multer.File,
+    req?: { user: { id: any } },
   ): Promise<object> {
     try {
       const product = await this.productModel.findByPk(id);
       if (!product) {
         throw new NotFoundException(`Product with ID ${id} not found `);
+      }
+
+      if (req?.user.id !== product.dataValues.seller_id) {
+        throw new BadRequestException(`You are not the owner of this product`);
       }
 
       let image = product.dataValues.image;
@@ -139,7 +158,7 @@ export class ProductsService {
       }
 
       const updatedProduct = await this.productModel.update(
-        { updateProductDto, image },
+        { ...updateProductDto, image },
         {
           where: { id },
           returning: true,
@@ -152,11 +171,15 @@ export class ProductsService {
     }
   }
 
-  async remove(id: number): Promise<object> {
+  async remove(id: number, req?: { user: { id: any } }): Promise<object> {
     try {
       const product = await this.productModel.findByPk(id);
       if (!product) {
         throw new NotFoundException(`Data with ID ${id} not found`);
+      }
+
+      if (req?.user.id !== product.dataValues.seller_id) {
+        throw new BadRequestException(`You are not the owner of this product`);
       }
       const { image } = product?.dataValues;
       if (image && (await this.fileService.existsFile(image))) {

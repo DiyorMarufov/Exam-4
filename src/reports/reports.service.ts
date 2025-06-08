@@ -1,7 +1,7 @@
 import {
-  BadRequestException,
   Injectable,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { reports } from './models/report.model';
@@ -34,6 +34,22 @@ export class ReportsService {
     }
   }
 
+  async findAllForCustomer(req: any): Promise<object> {
+    try {
+      const reports = await this.reportModel.findAll({
+        where: { user_id: req.user.id },
+        include: { all: true },
+      });
+
+      if (!reports) {
+        throw new ForbiddenException(`You are not the owner of this report`);
+      }
+      return successRes(reports);
+    } catch (error) {
+      return catchError(error);
+    }
+  }
+
   async findOne(id: number): Promise<object> {
     try {
       const report = await this.reportModel.findByPk(id, {
@@ -48,32 +64,41 @@ export class ReportsService {
     }
   }
 
-  async update(id: number, updateReportDto: UpdateReportDto): Promise<object> {
+  async update(
+    customerId: number,
+    updateReportDto: UpdateReportDto,
+  ): Promise<object> {
     try {
-      const [count, rows] = await this.reportModel.update(updateReportDto, {
-        where: { id },
-        returning: true,
+      const report = await this.reportModel.findOne({
+        where: { user_id: customerId },
       });
 
-      if (!count) {
-        throw new BadRequestException(
-          `Data with ID ${id} not found or not deleted`,
+      if (!report) {
+        throw new NotFoundException(
+          `Report not found with Customer ID ${customerId}`,
         );
       }
 
-      return successRes(rows[0]);
+      await report.update(updateReportDto);
+
+      return successRes(report);
     } catch (error) {
       return catchError(error);
     }
   }
 
-  async remove(id: number): Promise<object> {
+  async remove(customerId: number): Promise<object> {
     try {
-      const count = await this.reportModel.destroy({ where: { id } });
+      const report = await this.reportModel.findOne({
+        where: { user_id: customerId },
+      });
 
-      if (!count) {
-        throw new BadRequestException(`Data with ID ${id} not found`);
+      if (!report) {
+        throw new NotFoundException(
+          `Report with Customer ID ${customerId} not found`,
+        );
       }
+      await report.destroy();
       return successRes();
     } catch (error) {
       return catchError(error);

@@ -62,14 +62,14 @@ export class SellerController {
   }
 
   @UseGuards(AuthGuard, RolesGuard)
-  @checkRoles(Roles.SUPERADMIN, Roles.ADMIN)
+  @checkRoles(Roles.SUPERADMIN, Roles.ADMIN, Roles.CUSTOMER)
   @Get()
   findAll() {
     return this.sellerService.findAll();
   }
 
-  @UseGuards(AuthGuard, SellerGuard)
-  @checkRoles(Roles.SUPERADMIN, Roles.ADMIN, Roles.SELLER)
+  @UseGuards(AuthGuard, RolesGuard)
+  @checkRoles(Roles.SUPERADMIN, Roles.ADMIN, Roles.CUSTOMER, Roles.SELLER)
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.sellerService.findOne(id);

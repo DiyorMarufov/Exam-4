@@ -18,7 +18,10 @@ export class Notification extends Model {
   })
   customer_id: number;
 
-  @BelongsTo(() => Customer)
+  @BelongsTo(() => Customer, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   customer: Customer;
 
   @Column({
