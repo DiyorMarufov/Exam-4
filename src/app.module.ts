@@ -36,6 +36,8 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { resolve } from 'path';
 import { FileModule } from './file/file.module';
+import { ProductsImage } from './products/models/images-of-product.model';
+import { CategoriesImage } from './categories/models/category-image.model';
 
 @Module({
   imports: [
@@ -68,6 +70,8 @@ import { FileModule } from './file/file.module';
         Notification,
         Payment,
         SellerProfile,
+        ProductsImage,
+        CategoriesImage,
       ],
     }),
     ServeStaticModule.forRoot({

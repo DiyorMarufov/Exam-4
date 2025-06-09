@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { products } from './models/product.model';
+import { ProductsImage } from './models/images-of-product.model';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { catchError } from 'src/utils/error-catch';
@@ -13,34 +14,50 @@ import { successRes } from '../utils/success-response';
 import { Seller } from '../seller/model/seller.model';
 import { categories } from '../categories/models/category.model';
 import { Op } from 'sequelize';
+import { Sequelize } from 'sequelize-typescript';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectModel(products) private productModel: typeof products,
+    @InjectModel(ProductsImage)
+    private imageProductModel: typeof ProductsImage,
     @InjectModel(Seller) private sellerModel: typeof Seller,
     @InjectModel(categories) private categoryModel: typeof categories,
     private readonly fileService: FileService,
+    private readonly sequelize: Sequelize,
   ) {}
 
   async create(
     createProductDto: CreateProductDto,
-    file?: Express.Multer.File,
+    files?: Express.Multer.File[],
   ): Promise<object> {
+    const transaction = await this.sequelize.transaction();
     try {
-      let image: string | undefined;
-
-      if (file) {
-        image = await this.fileService.createFile(file);
-      }
-
       const newProduct = await this.productModel.create({
         ...createProductDto,
-        image,
+        transaction,
       });
 
-      return successRes(newProduct, 201);
+      const imagesUrl: string[] = [];
+      if (files && files.length > 0) {
+        for (let file of files) {
+          imagesUrl.push(await this.fileService.createFile(file));
+        }
+        const images = imagesUrl.map((image: string) => ({
+          image_url: image,
+          product_id: newProduct.id,
+        }));
+        await this.imageProductModel.bulkCreate(images, { transaction });
+      }
+      await transaction.commit();
+      const product = await this.productModel.findOne({
+        where: { id: newProduct.id },
+        include: { all: true },
+      });
+      return successRes(product, 201);
     } catch (error) {
+      await transaction.rollback();
       return catchError(error);
     }
   }
@@ -104,6 +121,9 @@ export class ProductsService {
               ? categoryWhere
               : undefined,
           },
+          {
+            model: ProductsImage,
+          },
         ],
       });
       return successRes(products);
@@ -135,9 +155,10 @@ export class ProductsService {
   async update(
     id: number,
     updateProductDto: UpdateProductDto,
-    file?: Express.Multer.File,
+    files?: Express.Multer.File[],
     req?: { user: { id: any } },
   ): Promise<object> {
+    const transaction = await this.sequelize.transaction();
     try {
       const product = await this.productModel.findByPk(id);
       if (!product) {
@@ -148,24 +169,41 @@ export class ProductsService {
         throw new BadRequestException(`You are not the owner of this product`);
       }
 
-      let image = product.dataValues.image;
+      await this.productModel.update(updateProductDto, {
+        where: { id },
+        transaction,
+      });
 
-      if (file) {
-        if (image && (await this.fileService.existsFile(image))) {
-          await this.fileService.deleteFile(image);
+      if (
+        files &&
+        updateProductDto.imageIds &&
+        files.length === updateProductDto.imageIds.length
+      ) {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const imageId = updateProductDto.imageIds[i];
+
+          const image = await this.imageProductModel.findByPk(imageId);
+          if (!image || image.dataValues.product_id !== id) {
+            throw new NotFoundException(
+              `Image with ID ${imageId} not found or doesn't belong to product ${id}`,
+            );
+          }
+          await this.fileService.deleteFile(image.dataValues.image_url);
+
+          const newUrl = await this.fileService.createFile(file);
+
+          await image.update({ image_url: newUrl }, { transaction });
         }
-        image = await this.fileService.createFile(file);
       }
+      await transaction.commit();
 
-      const updatedProduct = await this.productModel.update(
-        { ...updateProductDto, image },
-        {
-          where: { id },
-          returning: true,
-        },
-      );
+      const updatedProduct = await this.productModel.findOne({
+        where: { id },
+        include: { all: true },
+      });
 
-      return successRes(updatedProduct[1][0]);
+      return successRes(updatedProduct);
     } catch (error) {
       return catchError(error);
     }
@@ -181,11 +219,7 @@ export class ProductsService {
       if (req?.user.id !== product.dataValues.seller_id) {
         throw new BadRequestException(`You are not the owner of this product`);
       }
-      const { image } = product?.dataValues;
-      if (image && (await this.fileService.existsFile(image))) {
-        await this.fileService.deleteFile(image);
-      }
-      await this.productModel.destroy({ where: { id } });
+      await product.destroy()
       return successRes();
     } catch (error) {
       return catchError(error);

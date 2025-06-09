@@ -7,14 +7,14 @@ import {
   Param,
   Delete,
   ParseIntPipe,
-  UploadedFile,
+  UploadedFiles,
   UseInterceptors,
   UseGuards,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { ImageValidationPipe } from '../pipes/image-validation.pipe';
 import { AuthGuard } from '../guards/auth.guard';
 import { checkRoles } from '../decorators/role.decorator';
@@ -25,15 +25,15 @@ import { RolesGuard } from '../guards/roles.guard';
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FilesInterceptor('files'))
   @UseGuards(AuthGuard, RolesGuard)
   @checkRoles(Roles.SUPERADMIN, Roles.ADMIN)
   @Post()
   create(
     @Body() createCategoryDto: CreateCategoryDto,
-    @UploadedFile(new ImageValidationPipe()) file?: Express.Multer.File,
+    @UploadedFiles(new ImageValidationPipe()) files?: Express.Multer.File[],
   ) {
-    return this.categoriesService.create(createCategoryDto, file);
+    return this.categoriesService.create(createCategoryDto, files);
   }
 
   @Get()
@@ -46,16 +46,16 @@ export class CategoriesController {
     return this.categoriesService.findOne(id);
   }
 
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FilesInterceptor('files'))
   @UseGuards(AuthGuard, RolesGuard)
   @checkRoles(Roles.SUPERADMIN, Roles.ADMIN)
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCategoryDto: UpdateCategoryDto,
-    @UploadedFile(new ImageValidationPipe()) file?: Express.Multer.File,
+    @UploadedFiles(new ImageValidationPipe()) files?: Express.Multer.File[],
   ) {
-    return this.categoriesService.update(id, updateCategoryDto, file);
+    return this.categoriesService.update(id, updateCategoryDto, files);
   }
 
   @UseGuards(AuthGuard, RolesGuard)

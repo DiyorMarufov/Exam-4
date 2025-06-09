@@ -34,7 +34,7 @@ export class FileService {
 
   async deleteFile(fileName: string) {
     try {
-      fileName = fileName.split(String(process.env.BASE_URL))[1];
+      fileName = fileName.split(String(process.env.BASE_URL))[1];  
       const file = resolve(this.filePath, fileName);
       if (!existsSync(file)) {
         throw new BadRequestException(`File does not exist: ${fileName}`);

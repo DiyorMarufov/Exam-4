@@ -77,6 +77,7 @@ export class PaymentService {
       const newPayment = await this.paymentModel.create({
         ...createPaymentDto,
         receipt_number,
+        transaction
       });
       await transaction.commit();
 

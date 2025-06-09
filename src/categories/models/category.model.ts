@@ -1,5 +1,6 @@
 import { Table, Column, Model, DataType, HasMany } from 'sequelize-typescript';
 import { products } from '../../products/models/product.model';
+import { CategoriesImage } from './category-image.model';
 
 @Table({ tableName: 'categories' })
 export class categories extends Model {
@@ -15,11 +16,12 @@ export class categories extends Model {
   })
   description: string;
 
-  @Column({
-    type: DataType.STRING,
-  })
-  image: string;
-
   @HasMany(() => products)
   product: products[];
+
+  @HasMany(() => CategoriesImage, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  categoryImage: CategoriesImage;
 }

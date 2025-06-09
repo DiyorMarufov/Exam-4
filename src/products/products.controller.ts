@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   UploadedFile,
+  UploadedFiles,
   UseInterceptors,
   ParseIntPipe,
   UseGuards,
@@ -17,8 +18,7 @@ import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ImageValidationPipe } from '../pipes/image-validation.pipe';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { SellerGuard } from '../guards/seller.guard';
+import { FilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '../guards/auth.guard';
 import { checkRoles } from '../decorators/role.decorator';
 import { Roles } from '../enums/index';
@@ -30,13 +30,13 @@ export class ProductsController {
 
   @UseGuards(AuthGuard, RolesGuard)
   @checkRoles(Roles.SUPERADMIN, Roles.ADMIN, Roles.SELLER)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FilesInterceptor('files'))
   @Post()
   create(
     @Body() createProductDto: CreateProductDto,
-    @UploadedFile(new ImageValidationPipe()) file?: Express.Multer.File,
+    @UploadedFiles(new ImageValidationPipe()) files?: Express.Multer.File[],
   ) {
-    return this.productsService.create(createProductDto, file);
+    return this.productsService.create(createProductDto, files);
   }
 
   @Get()
@@ -52,14 +52,14 @@ export class ProductsController {
   @UseGuards(AuthGuard, RolesGuard)
   @checkRoles(Roles.SUPERADMIN, Roles.ADMIN, Roles.SELLER)
   @Patch(':id')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FilesInterceptor('files'))
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateProductDto: UpdateProductDto,
-    @UploadedFile(new ImageValidationPipe()) file?: Express.Multer.File,
+    @UploadedFiles(new ImageValidationPipe()) files?: Express.Multer.File[],
     @Req() req?,
   ) {
-    return this.productsService.update(id, updateProductDto, file, req);
+    return this.productsService.update(id, updateProductDto, files, req);
   }
 
   @UseGuards(AuthGuard, RolesGuard)

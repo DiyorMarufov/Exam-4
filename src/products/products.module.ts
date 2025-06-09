@@ -6,10 +6,16 @@ import { products } from './models/product.model';
 import { FileModule } from '../file/file.module';
 import { Seller } from '../seller/model/seller.model';
 import { categories } from '../categories/models/category.model';
+import { ProductsImage } from './models/images-of-product.model';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([products, Seller, categories]),
+    SequelizeModule.forFeature([
+      products,
+      ProductsImage,
+      Seller,
+      categories,
+    ]),
     FileModule,
   ],
   controllers: [ProductsController],

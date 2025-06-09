@@ -10,32 +10,51 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { catchError } from 'src/utils/error-catch';
 import { successRes } from '../utils/success-response';
 import { FileService } from '../file/file.service';
+import { Sequelize } from 'sequelize-typescript';
+import { CategoriesImage } from './models/category-image.model';
+import { basename } from 'path';
 
 @Injectable()
 export class CategoriesService {
   constructor(
     @InjectModel(categories)
     private readonly categoryModel: typeof categories,
+    @InjectModel(CategoriesImage)
+    private readonly categoryImageModel: typeof CategoriesImage,
     private readonly fileService: FileService,
+    private readonly sequelize: Sequelize,
   ) {}
 
   async create(
     createCategoryDto: CreateCategoryDto,
-    file?: Express.Multer.File,
+    files?: Express.Multer.File[],
   ): Promise<object> {
+    const transaction = await this.sequelize.transaction();
     try {
-      let image: undefined | string;
-
-      if (file) {
-        image = await this.fileService.createFile(file);
-      }
-
-      const category = await this.categoryModel.create({
+      const newCategory = await this.categoryModel.create({
         ...createCategoryDto,
-        image,
+        transaction,
       });
-      return successRes(category);
+
+      const imagesUrl: string[] = [];
+      if (files && files.length > 0) {
+        for (let file of files) {
+          imagesUrl.push(await this.fileService.createFile(file));
+        }
+        const images = imagesUrl.map((image) => ({
+          image_url: image,
+          category_id: newCategory.id,
+        }));
+        await this.categoryImageModel.bulkCreate(images, { transaction });
+      }
+      await transaction.commit();
+      const category = await this.categoryModel.findOne({
+        where: { id: newCategory.id },
+        include: { all: true },
+      });
+      return successRes(category, 201);
     } catch (error) {
+      await transaction.rollback();
       return catchError(error);
     }
   }
@@ -68,8 +87,9 @@ export class CategoriesService {
   async update(
     id: number,
     updateCategoryDto: UpdateCategoryDto,
-    file?: Express.Multer.File,
+    files?: Express.Multer.File[],
   ): Promise<object> {
+    const transaction = await this.sequelize.transaction();
     try {
       const category = await this.categoryModel.findByPk(id);
 
@@ -77,25 +97,43 @@ export class CategoriesService {
         throw new NotFoundException(`Category with ID ${id} not found`);
       }
 
-      let image = category.dataValues.image;
+      await this.categoryModel.update(updateCategoryDto, {
+        where: { id },
+        transaction,
+      });
 
-      if (file) {
-        if (image && (await this.fileService.existsFile(image))) {
-          await this.fileService.deleteFile(image);
+      if (
+        files &&
+        updateCategoryDto.imageIds &&
+        files.length === updateCategoryDto.imageIds.length
+      ) {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const imageId = updateCategoryDto.imageIds[i];
+
+          const image = await this.categoryImageModel.findByPk(imageId);
+          if (!image || image.dataValues.category_id !== id) {
+            throw new NotFoundException(
+              `Image with ID ${imageId} not found or doesn't belong to category ${id}`,
+            );
+          }
+          await this.fileService.deleteFile(image.dataValues.image_url);
+
+          const newUrl = await this.fileService.createFile(file);
+
+          await image.update({ image_url: newUrl }, { transaction });
         }
-        image = await this.fileService.createFile(file);
       }
+      await transaction.commit();
 
-      const updatedCategory = await this.categoryModel.update(
-        {
-          ...updateCategoryDto,
-          image,
-        },
-        { where: { id }, returning: true },
-      );
+      const updatedCategory = await this.categoryModel.findOne({
+        where: { id },
+        include: { all: true },
+      });
 
-      return successRes(updatedCategory[1][0]);
+      return successRes(updatedCategory);
     } catch (e) {
+      await transaction.rollback();
       return catchError(e);
     }
   }
@@ -108,11 +146,7 @@ export class CategoriesService {
         throw new NotFoundException(`Category with ID ${id} not found`);
       }
 
-      const { image } = category?.dataValues;
-      if (image && (await this.fileService.existsFile(image))) {
-        await this.fileService.deleteFile(image);
-      }
-      await this.categoryModel.destroy({ where: { id } });
+      await category.destroy();
       return successRes();
     } catch (error) {
       return catchError(error);

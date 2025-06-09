@@ -5,10 +5,12 @@ import {
   DataType,
   ForeignKey,
   BelongsTo,
+  HasMany,
 } from 'sequelize-typescript';
 import { deliveryoptions } from 'src/enums/delivery.options';
 import { Seller } from '../../seller/model/seller.model';
 import { categories } from '../../categories/models/category.model';
+import { ProductsImage } from './images-of-product.model';
 
 @Table({ tableName: 'products' })
 export class products extends Model {
@@ -46,11 +48,6 @@ export class products extends Model {
   })
   delivery_options: deliveryoptions;
 
-  @Column({
-    type: DataType.STRING,
-  })
-  image: string;
-
   @ForeignKey(() => Seller)
   @Column({
     type: DataType.INTEGER,
@@ -70,4 +67,10 @@ export class products extends Model {
 
   @BelongsTo(() => categories, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   category: categories;
+
+  @HasMany(() => ProductsImage, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  images: ProductsImage[];
 }
