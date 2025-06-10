@@ -33,7 +33,7 @@ export class AdminsController {
 
   @UseGuards(AuthGuard, RolesGuard)
   @checkRoles(Roles.SUPERADMIN)
-  @Post('signup')
+  @Post('createAdmin')
   createAdmin(@Body() createAdminDto: CreateAdminDto) {
     return this.adminsService.createAdmin(createAdminDto);
   }
