@@ -6,6 +6,7 @@ import { CategoriesImage } from './category-image.model';
 export class categories extends Model {
   @Column({
     type: DataType.STRING,
+    unique: true,
     allowNull: false,
   })
   name: string;
