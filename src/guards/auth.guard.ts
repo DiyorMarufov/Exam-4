@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   CanActivate,
   ExecutionContext,
   Injectable,
@@ -6,8 +7,8 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Observable } from 'rxjs';
-import config from 'src/config';
-import { catchError } from 'src/utils/catch-error';
+import { Status } from '../enums/index';
+import { catchError } from '../utils/error-catch';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -20,18 +21,22 @@ export class AuthGuard implements CanActivate {
       const req = context.switchToHttp().getRequest();
       const auth = req.headers?.authorization;
       if (!auth) {
-        throw new UnauthorizedException('Unauthorizated');
+        throw new UnauthorizedException('Unauthorized');
       }
-      const bearer = auth.split(' ')[0];
-      const token = auth.split(' ')[1];
-      if (bearer != 'Bearer' || !token) {
+
+      const [bearer, token] = auth.split(' ');
+
+      if (bearer !== 'Bearer' || !token) {
         throw new UnauthorizedException('Token not found');
       }
       const user = this.jwtService.verify(token, {
-        secret: config.ACCESS_TOKEN_KEY,
+        secret: process.env.ACCESS_TOKEN_KEY,
       });
       if (!user) {
         throw new UnauthorizedException('Token expired');
+      }
+      if (user?.status === Status.INACTIVE) {
+        throw new BadRequestException('User is inactive');
       }
       req.user = user;
       return true;
