@@ -15,6 +15,7 @@ import { OrderItems } from '../order-items/models/order-item.model';
 import { products } from '../products/models/product.model';
 import { Sequelize } from 'sequelize-typescript';
 import { v4 } from 'uuid';
+import { orderStatus } from '../enums/order-status';
 
 @Injectable()
 export class PaymentService {
@@ -67,7 +68,7 @@ export class PaymentService {
 
       await this.orderModel.update(
         {
-          order_status: `shipped`,
+          order_status: orderStatus.SHIPPING,
         },
         { where: { id: order_id }, transaction },
       );
@@ -77,7 +78,7 @@ export class PaymentService {
       const newPayment = await this.paymentModel.create({
         ...createPaymentDto,
         receipt_number,
-        transaction
+        transaction,
       });
       await transaction.commit();
 

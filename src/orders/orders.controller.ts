@@ -46,8 +46,8 @@ export class OrdersController {
   @UseGuards(AuthGuard, RolesGuard)
   @checkRoles(Roles.SUPERADMIN, Roles.ADMIN, Roles.CUSTOMER)
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number, @Req() res?) {
-    return this.ordersService.findOne(id, res);
+  findOne(@Param('id', ParseIntPipe) id: number, @Req() req?) {
+    return this.ordersService.findOne(id, req);
   }
 
   @UseGuards(AuthGuard, RolesGuard)

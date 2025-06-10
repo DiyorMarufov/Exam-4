@@ -30,7 +30,7 @@ export class Orders extends Model {
   @Column({
     type: DataType.ENUM(
       orderStatus.PENDING,
-      orderStatus.SHIPPED,
+      orderStatus.SHIPPING,
       orderStatus.DELIVERED,
       orderStatus.CANCELLED,
     ),
