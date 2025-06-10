@@ -9,6 +9,7 @@ import {
 import { products } from '../../products/models/product.model';
 import { Customer } from '../../customer/model/customer.model';
 
+
 @Table({ tableName: 'reviews' })
 export class reviews extends Model {
   @ForeignKey(() => Customer)

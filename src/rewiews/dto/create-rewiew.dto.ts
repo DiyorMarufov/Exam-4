@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsInt } from 'class-validator';
+import { IsString, IsNotEmpty, IsInt, IsEnum } from 'class-validator';
 
 export class CreateReviewDto {
   @IsInt()
@@ -9,7 +9,7 @@ export class CreateReviewDto {
   @IsNotEmpty()
   product_id: number;
 
-  @IsInt()
+  @IsEnum([1, 2, 3, 4, 5])
   @IsNotEmpty()
   rating: number;
 
