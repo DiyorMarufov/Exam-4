@@ -8,28 +8,59 @@ import { categories } from './models/category.model';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { catchError } from 'src/utils/error-catch';
+import { FileService } from 'src/file/file.service';
+import { Sequelize } from 'sequelize-typescript';
+import { categoriesImage } from './models/category.images.model';
 
 @Injectable()
 export class CategoriesService {
   constructor(
     @InjectModel(categories)
     private readonly categoryModel: typeof categories,
+    @InjectModel(categoriesImage)
+    private readonly categoryImageModel: typeof categoriesImage,
+    private readonly fileService: FileService,
+    private readonly sequelize: Sequelize,
   ) {}
 
-  async create(createCategoryDto: CreateCategoryDto): Promise<categories> {
+  async create(
+    createCategoryDto: CreateCategoryDto,
+    files?: Express.Multer.File[],
+  ): Promise<object> {
+    const transaction = await this.sequelize.transaction();
     try {
-      const category = await this.categoryModel.create({
+      const newCategory = await this.categoryModel.create({
         ...createCategoryDto,
+        transaction,
       });
-      return category;
+
+      const imagesUrl: string[] = [];
+      if (files && files.length > 0) {
+        for (let file of files) {
+          imagesUrl.push(await this.fileService.createFile(file));
+        }
+        const images = imagesUrl.map((image) => ({
+          image_url: image,
+          category_id: newCategory.id,
+        }));
+
+        await this.categoryImageModel.bulkCreate(images, { transaction });
+      }
+      await transaction.commit();
+      const category = await this.categoryModel.findOne({
+        where: { id: newCategory.id },
+        include: { all: true },
+      });
+      return { data: category };
     } catch (error) {
+      await transaction.rollback();
       return catchError(error);
     }
   }
 
   async findAll(): Promise<categories[]> {
     try {
-      return await this.categoryModel.findAll();
+      return await this.categoryModel.findAll({ include: { all: true } });
     } catch (error) {
       return catchError(error);
     }

@@ -1,5 +1,6 @@
-import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, HasMany } from 'sequelize-typescript';
 import { deliveryoptions } from 'src/enums/delivery.options';
+import { productsImage } from './products.images.model';
 
 @Table({ tableName: 'products' })
 export class products extends Model {
@@ -10,7 +11,7 @@ export class products extends Model {
   name: string;
 
   @Column({
-    type: DataType.DECIMAL,
+    type: DataType.DECIMAL(10,2),
     allowNull: false,
   })
   price: number;
@@ -37,21 +38,21 @@ export class products extends Model {
   })
   delivery_options: deliveryoptions;
 
-  @Column({
-    type: DataType.STRING(100),
-    allowNull: false,
-  })
-  image: string;
-
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
-  })
-  seller_id: number;
+  // @Column({
+  //   type: DataType.INTEGER,
+  //   allowNull: false,
+  // })
+  // seller_id: number;
 
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
   category_id: number;
+
+  @HasMany(()=> productsImage,{
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE"
+  })
+  productImage:productsImage
 }
